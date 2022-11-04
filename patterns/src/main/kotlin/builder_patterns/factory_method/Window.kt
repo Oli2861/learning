@@ -1,4 +1,4 @@
-package factory_method
+package builder_patterns.factory_method
 
 /**
  * Abstract creator class.
