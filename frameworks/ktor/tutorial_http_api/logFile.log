@@ -1,0 +1,237 @@
+2022-12-17 10:24:38.239 [main] INFO  ktor.application - Autoreload is disabled because the development mode is off.
+2022-12-17 10:24:39.280 [main] INFO  ktor.application - Hello from Application
+2022-12-17 10:24:39.286 [main] INFO  ktor.application - Application started in 1.231 seconds.
+2022-12-17 10:24:39.698 [DefaultDispatcher-worker-1] INFO  ktor.application - Responding at http://0.0.0.0:8080
+2022-12-17 10:24:52.641 [eventLoopGroupProxy-4-1] TRACE io.ktor.routing.Routing - Trace for []
+/, segment:0 -> SUCCESS @ /
+  /json, segment:0 -> FAILURE "Selector didn't match" @ /json
+  /, segment:0 -> SUCCESS @ /
+    /(method:GET), segment:0 -> SUCCESS @ /(method:GET)
+Matched routes:
+  "" -> "<slash>" -> "(method:GET)"
+Route resolve result:
+  SUCCESS @ /(method:GET)
+2022-12-17 10:24:52.654 [eventLoopGroupProxy-4-1] TRACE i.k.s.p.c.ContentNegotiation - Skipping because body is already converted.
+2022-12-17 10:24:52.663 [eventLoopGroupProxy-4-1] INFO  ktor.application - Hello from /!
+2022-12-17 10:29:00.250 [main] INFO  ktor.application - Autoreload is disabled because the development mode is off.
+2022-12-17 10:29:01.791 [main] INFO  ktor.application - Hello from Application
+2022-12-17 10:29:01.796 [main] INFO  ktor.application - Application started in 1.729 seconds.
+2022-12-17 10:29:02.114 [DefaultDispatcher-worker-1] INFO  ktor.application - Responding at http://0.0.0.0:8080
+2022-12-17 10:29:23.059 [eventLoopGroupProxy-4-1] TRACE io.ktor.routing.Routing - Trace for [item]
+/, segment:0 -> SUCCESS @ /
+  /json, segment:0 -> FAILURE "Selector didn't match" @ /json
+  /, segment:0 -> SUCCESS @ /
+    /(method:GET), segment:0 -> FAILURE "Not all segments matched" @ /(method:GET)
+Matched routes:
+  No results
+Route resolve result:
+  FAILURE "No matched subtrees found" @ /
+2022-12-17 10:29:23.111 [eventLoopGroupProxy-4-1] TRACE i.k.s.p.c.ContentNegotiation - Skipping because the type is ignored.
+2022-12-17 10:58:42.439 [main] INFO  ktor.application - Autoreload is disabled because the development mode is off.
+2022-12-17 10:58:43.377 [main] INFO  ktor.application - Hello from Application
+2022-12-17 10:58:43.385 [main] INFO  ktor.application - Application started in 1.07 seconds.
+2022-12-17 10:58:44.096 [DefaultDispatcher-worker-1] INFO  ktor.application - Responding at http://0.0.0.0:8080
+2022-12-17 10:59:24.680 [eventLoopGroupProxy-4-1] TRACE io.ktor.routing.Routing - Trace for [item]
+/, segment:0 -> SUCCESS @ /
+  /json, segment:0 -> FAILURE "Selector didn't match" @ /json
+  /, segment:0 -> SUCCESS @ /
+    /(method:GET), segment:0 -> FAILURE "Not all segments matched" @ /(method:GET)
+  /item, segment:1 -> SUCCESS @ /item
+    /item/(method:GET), segment:1 -> SUCCESS @ /item/(method:GET)
+Matched routes:
+  "" -> "item" -> "(method:GET)"
+Route resolve result:
+  SUCCESS @ /item/(method:GET)
+2022-12-17 10:59:24.889 [eventLoopGroupProxy-4-1] ERROR ktor.application - Unhandled: GET - /item
+kotlinx.serialization.SerializationException: Serializer for class 'Item' is not found.
+Mark the class as @Serializable or provide the serializer explicitly.
+	at kotlinx.serialization.internal.Platform_commonKt.serializerNotRegistered(Platform.common.kt:91)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:149)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at io.ktor.serialization.kotlinx.SerializerLookupKt.guessSerializer(SerializerLookup.kt:44)
+	at io.ktor.serialization.kotlinx.KotlinxSerializationBase.serialize$ktor_serialization_kotlinx(KotlinxSerializationBase.kt:34)
+	at io.ktor.serialization.kotlinx.KotlinxSerializationConverter.serializeNullable(KotlinxSerializationConverter.kt:54)
+	at io.ktor.server.plugins.contentnegotiation.ResponseConverterKt$convertResponseBody$1$2.invokeSuspend(ResponseConverter.kt:59)
+	at io.ktor.server.plugins.contentnegotiation.ResponseConverterKt$convertResponseBody$1$2.invoke(ResponseConverter.kt)
+	at io.ktor.server.plugins.contentnegotiation.ResponseConverterKt$convertResponseBody$1$2.invoke(ResponseConverter.kt)
+	at io.ktor.server.application.OnCallRespondContext.transformBody(KtorCallContexts.kt:86)
+	at io.ktor.server.plugins.contentnegotiation.ResponseConverterKt$convertResponseBody$1.invokeSuspend(ResponseConverter.kt:32)
+	at io.ktor.server.plugins.contentnegotiation.ResponseConverterKt$convertResponseBody$1.invoke(ResponseConverter.kt)
+	at io.ktor.server.plugins.contentnegotiation.ResponseConverterKt$convertResponseBody$1.invoke(ResponseConverter.kt)
+	at io.ktor.server.application.PluginBuilder$onDefaultPhase$1.invokeSuspend(PluginBuilder.kt:215)
+	at io.ktor.server.application.PluginBuilder$onDefaultPhase$1.invoke(PluginBuilder.kt)
+	at io.ktor.server.application.PluginBuilder$onDefaultPhase$1.invoke(PluginBuilder.kt)
+	at io.ktor.server.application.PluginBuilder$onDefaultPhaseWithMessage$1$1$1.invokeSuspend(PluginBuilder.kt:198)
+	at io.ktor.server.application.PluginBuilder$onDefaultPhaseWithMessage$1$1$1.invoke(PluginBuilder.kt)
+	at io.ktor.server.application.PluginBuilder$onDefaultPhaseWithMessage$1$1$1.invoke(PluginBuilder.kt)
+	at io.ktor.util.debug.ContextUtilsKt.addToContextInDebugMode(ContextUtils.kt:30)
+	at io.ktor.server.application.PluginBuilder$onDefaultPhaseWithMessage$1$1.invokeSuspend(PluginBuilder.kt:194)
+	at io.ktor.server.application.PluginBuilder$onDefaultPhaseWithMessage$1$1.invoke(PluginBuilder.kt)
+	at io.ktor.server.application.PluginBuilder$onDefaultPhaseWithMessage$1$1.invoke(PluginBuilder.kt)
+	at io.ktor.util.pipeline.SuspendFunctionGun.loop(SuspendFunctionGun.kt:120)
+	at io.ktor.util.pipeline.SuspendFunctionGun.proceed(SuspendFunctionGun.kt:78)
+	at io.ktor.util.pipeline.SuspendFunctionGun.execute$ktor_utils(SuspendFunctionGun.kt:98)
+	at io.ktor.util.pipeline.Pipeline.execute(Pipeline.kt:77)
+	at com.oli.ApplicationKt$configureItemRouting$1$1.invokeSuspend(Application.kt:50)
+	at com.oli.ApplicationKt$configureItemRouting$1$1.invoke(Application.kt)
+	at com.oli.ApplicationKt$configureItemRouting$1$1.invoke(Application.kt)
+	at io.ktor.server.routing.Route$buildPipeline$1$1.invokeSuspend(Route.kt:116)
+	at io.ktor.server.routing.Route$buildPipeline$1$1.invoke(Route.kt)
+	at io.ktor.server.routing.Route$buildPipeline$1$1.invoke(Route.kt)
+	at io.ktor.util.pipeline.SuspendFunctionGun.loop(SuspendFunctionGun.kt:120)
+	at io.ktor.util.pipeline.SuspendFunctionGun.proceed(SuspendFunctionGun.kt:78)
+	at io.ktor.util.pipeline.SuspendFunctionGun.execute$ktor_utils(SuspendFunctionGun.kt:98)
+	at io.ktor.util.pipeline.Pipeline.execute(Pipeline.kt:77)
+	at io.ktor.server.routing.Routing$executeResult$$inlined$execute$1.invokeSuspend(Pipeline.kt:478)
+	at io.ktor.server.routing.Routing$executeResult$$inlined$execute$1.invoke(Pipeline.kt)
+	at io.ktor.server.routing.Routing$executeResult$$inlined$execute$1.invoke(Pipeline.kt)
+	at io.ktor.util.debug.ContextUtilsKt.initContextInDebugMode(ContextUtils.kt:17)
+	at io.ktor.server.routing.Routing.executeResult(Routing.kt:190)
+	at io.ktor.server.routing.Routing.interceptor(Routing.kt:64)
+	at io.ktor.server.routing.Routing$Plugin$install$1.invokeSuspend(Routing.kt:140)
+	at io.ktor.server.routing.Routing$Plugin$install$1.invoke(Routing.kt)
+	at io.ktor.server.routing.Routing$Plugin$install$1.invoke(Routing.kt)
+	at io.ktor.util.pipeline.SuspendFunctionGun.loop(SuspendFunctionGun.kt:120)
+	at io.ktor.util.pipeline.SuspendFunctionGun.proceed(SuspendFunctionGun.kt:78)
+	at io.ktor.server.engine.BaseApplicationEngineKt$installDefaultTransformationChecker$1.invokeSuspend(BaseApplicationEngine.kt:123)
+	at io.ktor.server.engine.BaseApplicationEngineKt$installDefaultTransformationChecker$1.invoke(BaseApplicationEngine.kt)
+	at io.ktor.server.engine.BaseApplicationEngineKt$installDefaultTransformationChecker$1.invoke(BaseApplicationEngine.kt)
+	at io.ktor.util.pipeline.SuspendFunctionGun.loop(SuspendFunctionGun.kt:120)
+	at io.ktor.util.pipeline.SuspendFunctionGun.proceed(SuspendFunctionGun.kt:78)
+	at io.ktor.util.pipeline.SuspendFunctionGun.execute$ktor_utils(SuspendFunctionGun.kt:98)
+	at io.ktor.util.pipeline.Pipeline.execute(Pipeline.kt:77)
+	at io.ktor.server.engine.DefaultEnginePipelineKt$defaultEnginePipeline$1$invokeSuspend$$inlined$execute$1.invokeSuspend(Pipeline.kt:478)
+	at io.ktor.server.engine.DefaultEnginePipelineKt$defaultEnginePipeline$1$invokeSuspend$$inlined$execute$1.invoke(Pipeline.kt)
+	at io.ktor.server.engine.DefaultEnginePipelineKt$defaultEnginePipeline$1$invokeSuspend$$inlined$execute$1.invoke(Pipeline.kt)
+	at io.ktor.util.debug.ContextUtilsKt.initContextInDebugMode(ContextUtils.kt:17)
+	at io.ktor.server.engine.DefaultEnginePipelineKt$defaultEnginePipeline$1.invokeSuspend(DefaultEnginePipeline.kt:118)
+	at io.ktor.server.engine.DefaultEnginePipelineKt$defaultEnginePipeline$1.invoke(DefaultEnginePipeline.kt)
+	at io.ktor.server.engine.DefaultEnginePipelineKt$defaultEnginePipeline$1.invoke(DefaultEnginePipeline.kt)
+	at io.ktor.util.pipeline.SuspendFunctionGun.loop(SuspendFunctionGun.kt:120)
+	at io.ktor.util.pipeline.SuspendFunctionGun.proceed(SuspendFunctionGun.kt:78)
+	at io.ktor.util.pipeline.SuspendFunctionGun.execute$ktor_utils(SuspendFunctionGun.kt:98)
+	at io.ktor.util.pipeline.Pipeline.execute(Pipeline.kt:77)
+	at io.ktor.server.netty.NettyApplicationCallHandler$handleRequest$1$invokeSuspend$$inlined$execute$1.invokeSuspend(Pipeline.kt:478)
+	at io.ktor.server.netty.NettyApplicationCallHandler$handleRequest$1$invokeSuspend$$inlined$execute$1.invoke(Pipeline.kt)
+	at io.ktor.server.netty.NettyApplicationCallHandler$handleRequest$1$invokeSuspend$$inlined$execute$1.invoke(Pipeline.kt)
+	at io.ktor.util.debug.ContextUtilsKt.initContextInDebugMode(ContextUtils.kt:17)
+	at io.ktor.server.netty.NettyApplicationCallHandler$handleRequest$1.invokeSuspend(NettyApplicationCallHandler.kt:119)
+	at io.ktor.server.netty.NettyApplicationCallHandler$handleRequest$1.invoke(NettyApplicationCallHandler.kt)
+	at io.ktor.server.netty.NettyApplicationCallHandler$handleRequest$1.invoke(NettyApplicationCallHandler.kt)
+	at kotlinx.coroutines.intrinsics.UndispatchedKt.startCoroutineUndispatched(Undispatched.kt:55)
+	at kotlinx.coroutines.CoroutineStart.invoke(CoroutineStart.kt:112)
+	at kotlinx.coroutines.AbstractCoroutine.start(AbstractCoroutine.kt:126)
+	at kotlinx.coroutines.BuildersKt__Builders_commonKt.launch(Builders.common.kt:56)
+	at kotlinx.coroutines.BuildersKt.launch(Unknown Source)
+	at io.ktor.server.netty.NettyApplicationCallHandler.handleRequest(NettyApplicationCallHandler.kt:37)
+	at io.ktor.server.netty.NettyApplicationCallHandler.channelRead(NettyApplicationCallHandler.kt:29)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)
+	at io.netty.channel.AbstractChannelHandlerContext.access$600(AbstractChannelHandlerContext.java:61)
+	at io.netty.channel.AbstractChannelHandlerContext$7.run(AbstractChannelHandlerContext.java:425)
+	at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:174)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:167)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:470)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:569)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.ktor.server.netty.EventLoopGroupProxy$Companion.create$lambda$1$lambda$0(NettyApplicationEngine.kt:291)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+2022-12-17 10:59:24.894 [eventLoopGroupProxy-4-1] TRACE i.k.s.p.c.ContentNegotiation - Skipping because the type is ignored.
+2022-12-17 11:00:09.530 [main] INFO  ktor.application - Autoreload is disabled because the development mode is off.
+2022-12-17 11:00:10.380 [main] INFO  ktor.application - Hello from Application
+2022-12-17 11:00:10.385 [main] INFO  ktor.application - Application started in 0.992 seconds.
+2022-12-17 11:00:10.689 [DefaultDispatcher-worker-1] INFO  ktor.application - Responding at http://0.0.0.0:8080
+2022-12-17 11:00:13.742 [eventLoopGroupProxy-4-1] TRACE io.ktor.routing.Routing - Trace for [item]
+/, segment:0 -> SUCCESS @ /
+  /json, segment:0 -> FAILURE "Selector didn't match" @ /json
+  /, segment:0 -> SUCCESS @ /
+    /(method:GET), segment:0 -> FAILURE "Not all segments matched" @ /(method:GET)
+  /item, segment:1 -> SUCCESS @ /item
+    /item/(method:GET), segment:1 -> SUCCESS @ /item/(method:GET)
+Matched routes:
+  "" -> "item" -> "(method:GET)"
+Route resolve result:
+  SUCCESS @ /item/(method:GET)
+2022-12-17 11:38:17.938 [main] INFO  ktor.application - Autoreload is disabled because the development mode is off.
+2022-12-17 11:38:18.728 [main] INFO  ktor.application - Hello from Application
+2022-12-17 11:38:18.746 [main] INFO  ktor.application - Application started in 0.907 seconds.
+2022-12-17 11:38:54.043 [main] INFO  ktor.application - Autoreload is disabled because the development mode is off.
+2022-12-17 11:38:54.715 [main] INFO  ktor.application - Hello from Application
+2022-12-17 11:38:54.727 [main] INFO  ktor.application - Application started in 0.781 seconds.
+2022-12-17 11:39:18.172 [main] INFO  ktor.application - Autoreload is disabled because the development mode is off.
+2022-12-17 11:39:19.119 [main] INFO  ktor.application - Hello from Application
+2022-12-17 11:39:19.241 [main] INFO  ktor.application - Application started in 1.187 seconds.
+2022-12-17 11:39:21.475 [DefaultDispatcher-worker-1] INFO  ktor.application - Responding at http://0.0.0.0:8081
+2022-12-17 11:46:06.215 [main] INFO  ktor.application - Autoreload is disabled because the development mode is off.
+2022-12-17 11:46:06.820 [main] INFO  ktor.application - Hello from Application
+2022-12-17 11:46:06.839 [main] INFO  ktor.application - Application started in 0.777 seconds.
+2022-12-17 11:46:07.067 [DefaultDispatcher-worker-1] INFO  ktor.application - Responding at http://0.0.0.0:8081
+2022-12-17 11:46:15.994 [eventLoopGroupProxy-4-2] TRACE io.ktor.routing.Routing - Trace for [customer]
+/, segment:0 -> SUCCESS @ /
+  /json, segment:0 -> FAILURE "Selector didn't match" @ /json
+  /, segment:0 -> SUCCESS @ /
+    /(method:GET), segment:0 -> FAILURE "Selector didn't match" @ /(method:GET)
+  /item, segment:0 -> FAILURE "Selector didn't match" @ /item
+Matched routes:
+  No results
+Route resolve result:
+  FAILURE "No matched subtrees found" @ /
+2022-12-17 11:46:16.015 [eventLoopGroupProxy-4-2] TRACE i.k.s.p.c.ContentNegotiation - Skipping because the type is ignored.
+2022-12-17 11:47:54.746 [main] INFO  ktor.application - Autoreload is disabled because the development mode is off.
+2022-12-17 11:47:55.272 [main] INFO  ktor.application - Hello from Application
+2022-12-17 11:47:55.283 [main] INFO  ktor.application - Application started in 0.624 seconds.
+2022-12-17 11:47:55.488 [DefaultDispatcher-worker-1] INFO  ktor.application - Responding at http://0.0.0.0:8081
+2022-12-17 11:48:01.456 [eventLoopGroupProxy-4-3] TRACE io.ktor.routing.Routing - Trace for [customer]
+/, segment:0 -> SUCCESS @ /
+  /json, segment:0 -> FAILURE "Selector didn't match" @ /json
+  /, segment:0 -> SUCCESS @ /
+    /(method:GET), segment:0 -> FAILURE "Selector didn't match" @ /(method:GET)
+  /item, segment:0 -> FAILURE "Selector didn't match" @ /item
+Matched routes:
+  No results
+Route resolve result:
+  FAILURE "No matched subtrees found" @ /
+2022-12-17 11:48:01.458 [eventLoopGroupProxy-4-3] TRACE i.k.s.p.c.ContentNegotiation - Skipping because the type is ignored.
+2022-12-17 11:48:07.201 [eventLoopGroupProxy-4-4] TRACE io.ktor.routing.Routing - Trace for [customer]
+/, segment:0 -> SUCCESS @ /
+  /json, segment:0 -> FAILURE "Selector didn't match" @ /json
+  /, segment:0 -> SUCCESS @ /
+    /(method:GET), segment:0 -> FAILURE "Selector didn't match" @ /(method:GET)
+  /item, segment:0 -> FAILURE "Selector didn't match" @ /item
+Matched routes:
+  No results
+Route resolve result:
+  FAILURE "No matched subtrees found" @ /
+2022-12-17 11:48:07.201 [eventLoopGroupProxy-4-4] TRACE i.k.s.p.c.ContentNegotiation - Skipping because the type is ignored.
+2022-12-17 11:48:22.485 [eventLoopGroupProxy-4-1] TRACE io.ktor.routing.Routing - Trace for [customer]
+/, segment:0 -> SUCCESS @ /
+  /json, segment:0 -> FAILURE "Selector didn't match" @ /json
+  /, segment:0 -> SUCCESS @ /
+    /(method:GET), segment:0 -> FAILURE "Selector didn't match" @ /(method:GET)
+  /customer, segment:1 -> SUCCESS @ /customer
+    /customer/(method:GET), segment:1 -> FAILURE "Selector didn't match" @ /customer/(method:GET)
+    /customer/{id?}, segment:1 -> SUCCESS @ /customer/{id?}
+      /customer/{id?}/(method:GET), segment:1 -> FAILURE "Selector didn't match" @ /customer/{id?}/(method:GET)
+    /customer/(method:POST), segment:1 -> SUCCESS @ /customer/(method:POST)
+    /customer/{id?, segment:1 -> FAILURE "Selector didn't match" @ /customer/{id?
+Matched routes:
+  "" -> "customer" -> "(method:POST)"
+Route resolve result:
+  SUCCESS @ /customer/(method:POST)
+2022-12-17 11:48:22.545 [eventLoopGroupProxy-4-1] TRACE i.k.server.engine.DefaultTransform - No Default Transformations found for class io.ktor.utils.io.ByteBufferChannel and expected type TypeInfo(type=class com.oli.customer.Customer, reifiedType=class com.oli.customer.Customer, kotlinType=com.oli.customer.Customer) for call /customer
+2022-12-17 11:48:22.598 [eventLoopGroupProxy-4-1] TRACE i.k.s.p.c.ContentNegotiation - Skipping because body is already converted.
+2022-12-17 11:48:40.237 [eventLoopGroupProxy-4-2] TRACE io.ktor.routing.Routing - Trace for [customer]
+/, segment:0 -> SUCCESS @ /
+  /json, segment:0 -> FAILURE "Selector didn't match" @ /json
+  /, segment:0 -> SUCCESS @ /
+    /(method:GET), segment:0 -> FAILURE "Not all segments matched" @ /(method:GET)
+  /customer, segment:1 -> SUCCESS @ /customer
+    /customer/(method:GET), segment:1 -> SUCCESS @ /customer/(method:GET)
+    /customer/{id?}, segment:1 -> FAILURE "Better match was already found" @ /customer/{id?}
+    /customer/(method:POST), segment:1 -> FAILURE "Selector didn't match" @ /customer/(method:POST)
+    /customer/{id?, segment:1 -> FAILURE "Selector didn't match" @ /customer/{id?
+Matched routes:
+  "" -> "customer" -> "(method:GET)"
+Route resolve result:
+  SUCCESS @ /customer/(method:GET)
