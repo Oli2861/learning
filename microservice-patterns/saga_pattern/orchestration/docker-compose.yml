@@ -1,0 +1,36 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3.11.9-management
+    container_name: rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - ./volumes/rabbitmq:/var/lib/rabbitmq/:rw
+      - ./volumes/rabbitmq/log:/var/log/rabbitmq/:rw
+  postgres_order_service:
+    image: postgres:15
+    container_name: postgres_order_service
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER_ORDER_SERVICE}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_ORDER_SERVICE}
+      POSTGRES_DATABASE: ${POSTGRES_DATABASE_ORDER_SERVICE}
+    volumes:
+      - ./volumes/postgres/data/order_service:/var/lib/postgresql/data:rw
+      - ./volumes/postgres/logs/order_service:/var/log/postgresql:rw
+  order_service:
+    build:
+      context: ./order_service
+    image: order_service
+    container_name: order_service
+    ports: 
+      - "8081:8081"
+    environment:
+      POSTGRES_HOST: postgres_order_service
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER_ORDER_SERVICE}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_ORDER_SERVICE}
+      POSTGRES_DATABASE: ${POSTGRES_DATABASE_ORDER_SERVICE}
+
