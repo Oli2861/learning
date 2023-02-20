@@ -10,23 +10,25 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object DatabaseFactory {
-
-    init {
+    fun init() {
         val host = System.getenv("POSTGRES_HOST")
         val port = System.getenv("POSTGRES_PORT")
         val user = System.getenv("POSTGRES_USER")
         val password = System.getenv("POSTGRES_PASSWORD")
-        val databaseName = System.getenv("POSTGRES_DATABASE")
+        val databaseName = System.getenv("POSTGRES_DB")
 
-        val driver = "org.postgresql.Driver"
-        val jdbcURL = "jdbc:postgresql://$host:$port/$databaseName?user=$user&password=$password"
-        val database = Database.connect(driver, jdbcURL)
+        val database = Database.connect(
+            url = "jdbc:postgresql://$host:$port/$databaseName?user=$user&password=$password",
+            driver = "org.postgresql.Driver"
+        )
+
         transaction(database) {
             addLogger(StdOutSqlLogger)
             SchemaUtils.create(Orders)
 
         }
-
-        suspend fun <T> dbQuery(block: suspend () -> T): T = newSuspendedTransaction(Dispatchers.IO) { block() }
     }
+
+
+    suspend fun <T> dbQuery(block: suspend () -> T): T = newSuspendedTransaction(Dispatchers.IO) { block() }
 }

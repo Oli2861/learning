@@ -1,5 +1,7 @@
 package com.oli
 
+import com.oli.order.orderModule
+import com.oli.persistence.DatabaseFactory
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -11,8 +13,7 @@ fun main() {
 }
 
 fun Application.module() {
-    configureHTTP()
-    configureMonitoring()
-    configureSerialization()
-    configureRouting()
+    configureKoin()
+    DatabaseFactory.init()
+    orderModule()
 }

@@ -1,0 +1,2 @@
+# usually would add the .env file to the gitignore but since this project is hust for learning, the credentials are chosen arbitrarily and are not really senstitive.
+/volumes
