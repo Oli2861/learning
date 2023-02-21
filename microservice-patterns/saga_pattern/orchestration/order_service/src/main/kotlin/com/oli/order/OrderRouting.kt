@@ -7,14 +7,14 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 
-object OrderRoutingConstants{
+object OrderRoutingConstants {
     const val ORDER_ROUTE_PATH = "/order"
 }
 
-fun Route.orderRouting(){
+fun Route.orderRouting() {
     val orderService by inject<OrderService>()
 
-    route(OrderRoutingConstants.ORDER_ROUTE_PATH){
+    route(OrderRoutingConstants.ORDER_ROUTE_PATH) {
 
         post {
             val order: OrderNoId = call.receive()
@@ -29,7 +29,10 @@ fun Route.orderRouting(){
         }
 
         delete("{id}") {
-            val id: String = call.parameters["id"] ?: return@delete call.respondText("Missing orderId", status = HttpStatusCode.BadRequest)
+            val id: String = call.parameters["id"] ?: return@delete call.respondText(
+                "Missing orderId",
+                status = HttpStatusCode.BadRequest
+            )
             val success: Boolean = orderService.deleteOrder(id)
 
             return@delete if (success) {
@@ -37,6 +40,21 @@ fun Route.orderRouting(){
             } else {
                 call.respondText("Unable to delete order with orderID $id", status = HttpStatusCode.NotFound)
             }
+        }
+
+        get("{id}") {
+            val id: String = call.parameters["id"] ?: return@get call.respondText(
+                "Missing orderId",
+                status = HttpStatusCode.BadRequest
+            )
+            val order = orderService.readOrder(id)
+
+            return@get if (order == null) {
+                call.respondText("Unable to retrieve order with id $id", status = HttpStatusCode.NotFound)
+            } else {
+                call.respond(order)
+            }
+
         }
 
     }

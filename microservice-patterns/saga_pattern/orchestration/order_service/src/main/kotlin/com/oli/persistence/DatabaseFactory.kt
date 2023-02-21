@@ -29,6 +29,6 @@ object DatabaseFactory {
         }
     }
 
-
-    suspend fun <T> dbQuery(block: suspend () -> T): T = newSuspendedTransaction(Dispatchers.IO) { block() }
+    // Function used to query the database. Will run blocking code on IO thread pool & won't block the current thread.
+    suspend fun <T> dbQuery(blockingOperation: suspend () -> T): T = newSuspendedTransaction(Dispatchers.IO) { blockingOperation() }
 }

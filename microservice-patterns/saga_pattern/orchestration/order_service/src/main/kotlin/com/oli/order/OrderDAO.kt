@@ -1,9 +1,9 @@
 package com.oli.order
 
-import com.oli.order.Order
 import java.sql.Timestamp
 
 interface OrderDAO {
-    suspend fun addOrder(userId: Int, timestamp: Timestamp): Order?
+    suspend fun createOrder(userId: Int, timestamp: Timestamp): Order?
+    suspend fun readOrder(id: Int): Order?
     suspend fun deleteOrder(id: Int): Boolean
 }
