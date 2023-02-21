@@ -1,13 +1,23 @@
 package com.oli.order
 
+import com.oli.plugins.TimestampAsLongSerializer
+import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.timestamp
 import java.sql.Timestamp
 
-data class OrderNoId(val userId: Int, val timestamp: Timestamp)
+@Serializable
 data class Order(
     val id: Int,
     val userId: Int,
+    @Serializable(with = TimestampAsLongSerializer::class)
+    val timestamp: Timestamp
+)
+
+@Serializable
+data class OrderNoId(
+    val userId: Int,
+    @Serializable(with = TimestampAsLongSerializer::class)
     val timestamp: Timestamp
 )
 
