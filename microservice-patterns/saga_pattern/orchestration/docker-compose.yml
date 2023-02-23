@@ -28,6 +28,9 @@ services:
     ports: 
       - "8081:8081"
     environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
       POSTGRES_HOST: postgres_order_service
       POSTGRES_PORT: 5432
       POSTGRES_USER: ${POSTGRES_USER_ORDER_SERVICE}

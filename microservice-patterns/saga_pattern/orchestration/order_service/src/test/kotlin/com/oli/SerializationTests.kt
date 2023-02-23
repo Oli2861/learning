@@ -1,7 +1,6 @@
 package com.oli
 
 import com.oli.order.Order
-import com.oli.order.OrderNoId
 import com.oli.plugins.TimestampAsLongSerializer
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -23,17 +22,9 @@ class SerializationTests {
 
     @Test
     fun testOrderSerialization() {
-        val order = Order(0, 0, Timestamp(1676973532903L))
+        val order = Order(0, 0, Timestamp(1676973532903L), 1, listOf(1, 2))
         val actual = Json.encodeToString(order)
-        val expected = "{\"id\":0,\"userId\":0,\"timestamp\":1676973532903}"
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun testOrderNoIdSerialization() {
-        val orderNoId = OrderNoId(0, Timestamp(1676973532903L))
-        val actual = Json.encodeToString(orderNoId)
-        val expected = "{\"userId\":0,\"timestamp\":1676973532903}"
+        val expected = "{\"id\":0,\"userId\":0,\"timestamp\":1676973532903,\"orderState\":1,\"items\":[1,2]}"
         assertEquals(expected, actual)
     }
 
@@ -49,17 +40,10 @@ class SerializationTests {
 
     @Test
     fun testOrderDeserialization() {
-        val jsonString = "{\"id\":0,\"userId\":0,\"timestamp\":1676973532903}"
+        val jsonString = "{\"id\":0,\"userId\":0,\"timestamp\":1676973532903,\"orderState\":1,\"items\":[1,2]}"
         val actual = Json.decodeFromString<Order>(jsonString)
-        val expected = Order(0, 0, Timestamp(1676973532903L))
+        val expected = Order(0, 0, Timestamp(1676973532903L), 1, listOf(1, 2))
         assertEquals(expected, actual)
     }
 
-    @Test
-    fun testOrderNoIdDeserialization() {
-        val jsonString = "{\"userId\":0,\"timestamp\":1676973532903}"
-        val actual = Json.decodeFromString<OrderNoId>(jsonString)
-        val expected = OrderNoId(0, Timestamp(1676973532903L))
-        assertEquals(expected, actual)
-    }
 }

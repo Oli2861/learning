@@ -1,5 +1,6 @@
 package com.oli.order
 
+import com.oli.orderdetails.OrderDetails
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -17,15 +18,16 @@ fun Route.orderRouting() {
     route(OrderRoutingConstants.ORDER_ROUTE_PATH) {
 
         post {
-            val order: OrderNoId = call.receive()
-
-            val createdOrder = orderService.createOrder(order)
-
+            val orderDetails: OrderDetails = call.receive()
+            TODO("Not yet implemented")
+            /*
+            // val createdOrder = orderService.createOrder(orderDetails.userId, orderDetails.orderingDate)
             return@post if (createdOrder == null) {
                 call.respondText("Unable to create the order", status = HttpStatusCode.Conflict)
             } else {
                 call.respondText("Created order with orderID ${createdOrder.id}", status = HttpStatusCode.Created)
             }
+             */
         }
 
         delete("{id}") {

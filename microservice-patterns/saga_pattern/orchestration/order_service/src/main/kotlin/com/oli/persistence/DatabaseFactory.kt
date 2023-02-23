@@ -1,5 +1,6 @@
 package com.oli.persistence
 
+import com.oli.order.OrderItems
 import com.oli.order.Orders
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
@@ -25,6 +26,7 @@ object DatabaseFactory {
         transaction(database) {
             addLogger(StdOutSqlLogger)
             SchemaUtils.create(Orders)
+            SchemaUtils.create(OrderItems)
 
         }
     }

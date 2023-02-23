@@ -2,6 +2,7 @@ package com.oli.order
 
 import org.apache.commons.text.StringEscapeUtils
 import org.slf4j.Logger
+import java.sql.Timestamp
 import kotlin.NumberFormatException
 
 class OrderService(
@@ -9,11 +10,11 @@ class OrderService(
     private val logger: Logger
 ) {
 
-    suspend fun createOrder(order: OrderNoId): Order? {
-        return orderDAO.createOrder(order.userId, order.timestamp)
+    suspend fun createOrder(order: Order): Order? {
+        return orderDAO.createOrder(order)
     }
 
-    suspend fun readOrder(id: String): Order?{
+    suspend fun readOrder(id: String): Order? {
         val orderId = stringIdToInt(id) ?: return null
         return orderDAO.readOrder(orderId)
     }
@@ -25,9 +26,13 @@ class OrderService(
 
     private fun stringIdToInt(id: String): Int? = try {
         id.toInt()
-    }catch (e: NumberFormatException){
+    } catch (e: NumberFormatException) {
         val sanitizedId = StringEscapeUtils.escapeJava(id)
         logger.error("Failed to parse id to number: $sanitizedId")
         null
+    }
+
+    suspend fun cancelOrder(id: Int): Int {
+        return orderDAO.updateOrderState(id, OrderStates.CANCELED)
     }
 }

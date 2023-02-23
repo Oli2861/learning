@@ -3,6 +3,7 @@ val kotlin_version: String by project
 val logback_version: String by project
 val exposed_version: String by project
 val postgresql_version: String by project
+val rabbitmq_version: String by project
 val koin_version: String by project
 
 plugins {
@@ -22,6 +23,14 @@ application {
 
 repositories {
     mavenCentral()
+}
+
+tasks.withType<Test> {
+    environment("POSTGRES_HOST", "localhost")
+    environment("POSTGRES_PORT", 5432)
+    environment("POSTGRES_USER", "order")
+    environment("POSTGRES_PASSWORD", "orderpw")
+    environment("POSTGRES_DB", "orderdb")
 }
 
 dependencies {
@@ -44,6 +53,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposed_version")
     // Postgres
     implementation("org.postgresql:postgresql:$postgresql_version")
+    // RabbitMQ
+    implementation("com.rabbitmq:amqp-client:$rabbitmq_version")
 
     // Koin (DI)
     implementation("io.insert-koin:koin-ktor:$koin_version")

@@ -2,29 +2,39 @@ package com.oli.order
 
 import com.oli.plugins.TimestampAsLongSerializer
 import kotlinx.serialization.Serializable
-import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.dao.IntEntity
+import org.jetbrains.exposed.dao.IntEntityClass
+import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.javatime.timestamp
 import java.sql.Timestamp
+
+object OrderStates{
+    const val PENDING = 0
+    const val APPROVED = 1
+    const val CANCELED = 2
+}
 
 @Serializable
 data class Order(
     val id: Int,
     val userId: Int,
     @Serializable(with = TimestampAsLongSerializer::class)
-    val timestamp: Timestamp
+    val timestamp: Timestamp,
+    val orderState: Int,
+    val items: List<Int>
 )
 
-@Serializable
-data class OrderNoId(
-    val userId: Int,
-    @Serializable(with = TimestampAsLongSerializer::class)
-    val timestamp: Timestamp
-)
+class OrderEntity(id: EntityID<Int>): IntEntity(id){
+    companion object: IntEntityClass<OrderEntity>(Orders)
 
-object Orders : Table() {
-    val id = integer("id").autoIncrement()
-    val userID = integer("userId")
+    var userId by Orders.userId
+    var date by Orders.date
+    var state by Orders.state
+}
+
+object Orders : IntIdTable() {
+    val userId = integer("userId")
     val date = timestamp("timestamp")
-
-    override val primaryKey = PrimaryKey(id)
+    val state = integer("orderState")
 }
