@@ -23,7 +23,11 @@ data class Saga(val steps: MutableList<Step> = mutableListOf()) {
 
 data class Step(
     var description: String? = null,
-    var transaction: (suspend () -> Boolean)? = null,
-    var compensatingTransaction: (suspend () -> Boolean)? = null,
+    var transaction: (suspend () -> StepResult)? = null,
+    var compensatingTransaction: (suspend () -> StepResult)? = null,
     var onResult: (suspend () -> Unit)? = null
 )
+
+enum class StepResult{
+    SUCCESS, RETRY, FAILURE
+}

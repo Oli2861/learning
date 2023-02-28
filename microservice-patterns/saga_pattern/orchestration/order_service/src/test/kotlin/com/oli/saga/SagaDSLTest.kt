@@ -9,13 +9,13 @@ class SagaDSLTest {
     @Test
     fun buildSagaTest() {
         val descriptionFirstStep = "1. example step"
-        val stepFirstStep: suspend () -> Boolean = { true }
-        val compensationFirstStep: suspend () -> Boolean = { true }
+        val stepFirstStep: suspend () -> StepResult = { StepResult.SUCCESS }
+        val compensationFirstStep: suspend () -> StepResult = { StepResult.SUCCESS }
         val onResultFirstStep: suspend () -> Unit = {}
 
         val descriptionSecondStep = "2. example step"
-        val stepSecondStep: suspend () -> Boolean = { false }
-        val compensationSecondStep: suspend () -> Boolean = { false }
+        val stepSecondStep: suspend () -> StepResult = { StepResult.FAILURE }
+        val compensationSecondStep: suspend () -> StepResult = { StepResult.FAILURE }
 
 
         val saga = saga {

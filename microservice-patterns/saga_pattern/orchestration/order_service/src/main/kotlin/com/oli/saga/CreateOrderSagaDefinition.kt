@@ -40,7 +40,8 @@ class CreateOrderSagaDefinition(
             transaction = ::consumerServiceVerifyConsumerDetails
         }
         step {
-            description = "Step 3: Create a ticket in the kitchen service in the pending state. Compensate by setting its state to rejected."
+            description =
+                "Step 3: Create a ticket in the kitchen service in the pending state. Compensate by setting its state to rejected."
             transaction = ::kitchenServiceCreateTicket
             compensatingTransaction = ::kitchenServiceCancelTicket
         }
@@ -62,46 +63,47 @@ class CreateOrderSagaDefinition(
      * Create an order.
      * @return Whether the order was created successfully.
      */
-    private suspend fun orderServiceCreateOrder(): Boolean {
+    private suspend fun orderServiceCreateOrder(): StepResult {
         val order =
             Order(0, orderDetails.userId, orderDetails.orderingDate, EntityStates.PENDING, orderDetails.articleNumbers)
         val createdOrder = orderService.createOrder(orderSagaState.sagaId, order)
-        return createdOrder != null
+
+        return if (createdOrder == null) StepResult.FAILURE else StepResult.SUCCESS
     }
 
     /**
      * Compensate an order creation by setting its state to canceled.
      */
-    private suspend fun orderServiceRejectOrder(): Boolean {
-        val affectedEntries = orderService.updateOrderState(orderSagaState.sagaId, EntityStates.PENDING)
-        return affectedEntries == 1
+    private suspend fun orderServiceRejectOrder(): StepResult {
+        val affectedEntries = orderService.updateOrderState(orderSagaState.sagaId, EntityStates.CANCELED)
+        return if (affectedEntries == 1) StepResult.SUCCESS else StepResult.RETRY
     }
 
-    private suspend fun consumerServiceVerifyConsumerDetails(): Boolean {
-        return consumerServiceProxy.verifyConsumerDetails(orderSagaState.sagaId)
+    private suspend fun consumerServiceVerifyConsumerDetails(): StepResult {
+        return if(consumerServiceProxy.verifyConsumerDetails(orderDetails.userId)) StepResult.SUCCESS else StepResult.FAILURE
     }
 
-    private suspend fun kitchenServiceCreateTicket(): Boolean {
-        return kitchenServiceProxy.createTicket(orderSagaState.sagaId)
+    private suspend fun kitchenServiceCreateTicket(): StepResult {
+        return if(kitchenServiceProxy.createTicket(orderSagaState.sagaId)) StepResult.SUCCESS else StepResult.FAILURE
     }
 
-    private suspend fun kitchenServiceCancelTicket(): Boolean {
+    private suspend fun kitchenServiceCancelTicket(): StepResult {
         val affectedEntries = kitchenServiceProxy.cancelOrder(orderSagaState.sagaId)
-        return affectedEntries == 1
+        return if(affectedEntries == 1) StepResult.SUCCESS else StepResult.RETRY
     }
 
-    private suspend fun accountingServiceAuthorize(): Boolean {
-        return accountingServiceProxy.authorize(orderSagaState.sagaId, orderDetails.userId, orderDetails.paymentInfo)
+    private suspend fun accountingServiceAuthorize(): StepResult {
+        return if(accountingServiceProxy.authorize(orderSagaState.sagaId, orderDetails.userId, orderDetails.paymentInfo)) StepResult.SUCCESS else StepResult.FAILURE
     }
 
-    private suspend fun kitchenServiceApproveTicket(): Boolean {
+    private suspend fun kitchenServiceApproveTicket(): StepResult {
         val affectedEntries = kitchenServiceProxy.approveTicket(orderSagaState.sagaId)
-        return affectedEntries == 1
+        return if(affectedEntries == 1) StepResult.SUCCESS else StepResult.RETRY
     }
 
-    private suspend fun orderServiceApproveTicket(): Boolean {
+    private suspend fun orderServiceApproveTicket(): StepResult {
         val affectedEntries = orderService.updateOrderState(orderSagaState.sagaId, EntityStates.APPROVED)
-        return affectedEntries == 1
+        return if(affectedEntries == 1) StepResult.SUCCESS else StepResult.RETRY
     }
 }
 
