@@ -1,15 +1,21 @@
 package com.oli.proxies
 
-class KitchenServiceProxy {
-    fun createTicket(sagaId: Int): Boolean {
-        TODO()
+interface KitchenServiceProxy {
+    fun createTicket(sagaId: Int): Boolean
+    fun cancelOrder(sagaId: Int): Int
+    fun approveTicket(sagaId: Int): Int
+}
+
+class KitchenServiceProxyImpl : KitchenServiceProxy {
+    override fun createTicket(sagaId: Int): Boolean {
+        return false
     }
 
-    fun cancelOrder(sagaId: Int): Int {
-        TODO()
+    override fun cancelOrder(sagaId: Int): Int {
+        return -1
     }
 
-    fun approveTicket(sagaId: Int): Int {
-        TODO()
+    override fun approveTicket(sagaId: Int): Int {
+        return -1
     }
 }

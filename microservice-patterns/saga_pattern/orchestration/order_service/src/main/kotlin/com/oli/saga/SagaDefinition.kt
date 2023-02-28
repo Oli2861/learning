@@ -1,12 +1,12 @@
 package com.oli.saga
 
-import org.koin.logger.SLF4JLogger
+import org.slf4j.Logger
 
 enum class SagaStepResult { UNFINISHED, FINISHED, ROLLED_BACK }
 
 abstract class SagaDefinition(
     private val sagaState: SagaState,
-    private val logger: SLF4JLogger,
+    private val logger: Logger,
     private val sagaName: String
 ) {
     protected abstract val saga: Saga

@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.BeforeClass
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class OrderSagaDAOTest {
     companion object {
@@ -30,7 +31,7 @@ class OrderSagaDAOTest {
     @Test
     fun testRead() = runBlocking {
         val created = createOrderSagaStateDAO.create(1, false, 0)
-        val readValue = createOrderSagaStateDAO.read(created.id.value)!!
+        val readValue = createOrderSagaStateDAO.read(created.sagaId)!!
 
         assertEquals(1, readValue.currentStep)
         assertEquals(false, readValue.rollingBack)
@@ -40,8 +41,8 @@ class OrderSagaDAOTest {
     @Test
     fun testDelete() = runBlocking {
         val created = createOrderSagaStateDAO.create(1, false, 0)
-        val retVal = createOrderSagaStateDAO.delete(created.id.value)
-        val readValue = createOrderSagaStateDAO.read(created.id.value)
+        val retVal = createOrderSagaStateDAO.delete(created.sagaId)
+        val readValue = createOrderSagaStateDAO.read(created.sagaId)
 
         assertEquals(1, retVal)
         assertEquals(null, readValue)

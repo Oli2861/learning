@@ -31,8 +31,9 @@ class OrderSagaAssociationDAOTest {
 
     @Test
     fun testCreate() = runBlocking {
-        val order = orderDAO.createOrderReturnEntity(Order(0, 0, Timestamp(System.currentTimeMillis()), 0, listOf(OrderItem(1,1)))).first!!
-        val createOrderSagaState = sagaStateDAO.create(0, false, 0)
+        val order =
+            orderDAO.createOrderReturnEntity(Order(0, 0, Timestamp(System.currentTimeMillis()), 0, listOf(OrderItem(1,1)))).first
+        val createOrderSagaState = sagaStateDAO.createAndReturnEntity(0, false, 0)
         val orderSagaAssociation = orderSagaAssociationDAO.create(order, createOrderSagaState)
 
         assertEquals(order.id.value, orderSagaAssociation.orderId.value)
@@ -41,8 +42,9 @@ class OrderSagaAssociationDAOTest {
 
     @Test
     fun testReadUsingSagaId() = runBlocking {
-        val order = orderDAO.createOrderReturnEntity(Order(0, 0, Timestamp(System.currentTimeMillis()), 0, listOf(OrderItem(1, 2)))).first!!
-        val createOrderSagaState = sagaStateDAO.create(0, false, 0)
+        val order =
+            orderDAO.createOrderReturnEntity(Order(0, 0, Timestamp(System.currentTimeMillis()), 0, listOf(OrderItem(1, 2)))).first
+        val createOrderSagaState = sagaStateDAO.createAndReturnEntity(0, false, 0)
         orderSagaAssociationDAO.create(order, createOrderSagaState)
         val association = orderSagaAssociationDAO.readUsingSagaId(createOrderSagaState.id.value)!!
 
@@ -52,8 +54,9 @@ class OrderSagaAssociationDAOTest {
 
     @Test
     fun testDeleteAllForSaga() = runBlocking {
-        val order = orderDAO.createOrderReturnEntity(Order(0, 0, Timestamp(System.currentTimeMillis()), 0, listOf(OrderItem(1, 1)))).first!!
-        val createOrderSagaState = sagaStateDAO.create(0, false, 0)
+        val order =
+            orderDAO.createOrderReturnEntity(Order(0, 0, Timestamp(System.currentTimeMillis()), 0, listOf(OrderItem(1, 1)))).first
+        val createOrderSagaState = sagaStateDAO.createAndReturnEntity(0, false, 0)
         orderSagaAssociationDAO.create(order, createOrderSagaState)
 
         val retVal = orderSagaAssociationDAO.deleteAllForSaga(createOrderSagaState.id.value)

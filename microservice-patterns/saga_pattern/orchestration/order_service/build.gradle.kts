@@ -5,6 +5,7 @@ val exposed_version: String by project
 val postgresql_version: String by project
 val rabbitmq_version: String by project
 val koin_version: String by project
+val mockito_version: String by project
 
 plugins {
     kotlin("jvm") version "1.8.10"
@@ -44,6 +45,7 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktor_version")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
+
     implementation("ch.qos.logback:logback-classic:$logback_version")
 
     // Exposed for db connectivity
@@ -65,4 +67,7 @@ dependencies {
 
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+
+    // Mockito
+    testImplementation("org.mockito:mockito-core:$mockito_version")
 }

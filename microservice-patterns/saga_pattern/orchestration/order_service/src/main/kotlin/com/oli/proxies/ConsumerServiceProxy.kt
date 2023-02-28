@@ -1,7 +1,9 @@
 package com.oli.proxies
-
-class ConsumerServiceProxy {
-    fun verifyConsumerDetails(sagaId: Int): Boolean {
-        TODO()
+interface ConsumerServiceProxy{
+    fun verifyConsumerDetails(sagaId: Int): Boolean
+}
+class ConsumerServiceProxyImpl: ConsumerServiceProxy{
+    override fun verifyConsumerDetails(sagaId: Int): Boolean {
+        return false
     }
 }
