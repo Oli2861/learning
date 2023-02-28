@@ -1,38 +1,29 @@
 package com.oli.order
 
-import org.apache.commons.text.StringEscapeUtils
+import com.oli.utility.stringIdToInt
 import org.slf4j.Logger
-import java.sql.Timestamp
-import kotlin.NumberFormatException
 
 class OrderService(
-    private val orderDAO: OrderDAO,
+    private val orderRepository: OrderRepository,
     private val logger: Logger
 ) {
 
-    suspend fun createOrder(order: Order): Order? {
-        return orderDAO.createOrder(order)
+    suspend fun createOrder(sagaId: Int, order: Order): Order? {
+        return orderRepository.createOrder(sagaId, order)
     }
 
     suspend fun readOrder(id: String): Order? {
-        val orderId = stringIdToInt(id) ?: return null
-        return orderDAO.readOrder(orderId)
+        val orderId = stringIdToInt(id, logger) ?: return null
+        return orderRepository.readOrder(orderId)
     }
 
-    suspend fun deleteOrder(id: String): Boolean {
-        val orderId = stringIdToInt(id) ?: return false
-        return orderDAO.deleteOrder(orderId)
+    suspend fun deleteOrder(id: String): Int {
+        val orderId = stringIdToInt(id, logger) ?: return -1
+        return orderRepository.deleteOrder(orderId)
     }
 
-    private fun stringIdToInt(id: String): Int? = try {
-        id.toInt()
-    } catch (e: NumberFormatException) {
-        val sanitizedId = StringEscapeUtils.escapeJava(id)
-        logger.error("Failed to parse id to number: $sanitizedId")
-        null
+    suspend fun updateOrderState(sagaId: Int, orderState: Int): Int {
+        return orderRepository.updateOrderState(sagaId, orderState)
     }
 
-    suspend fun cancelOrder(id: Int): Int {
-        return orderDAO.updateOrderState(id, OrderStates.CANCELED)
-    }
 }

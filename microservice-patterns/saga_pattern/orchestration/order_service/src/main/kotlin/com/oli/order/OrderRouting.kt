@@ -1,6 +1,6 @@
 package com.oli.order
 
-import com.oli.orderdetails.OrderDetails
+import com.oli.orderdetails.OrderDetailsEntity
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -18,7 +18,7 @@ fun Route.orderRouting() {
     route(OrderRoutingConstants.ORDER_ROUTE_PATH) {
 
         post {
-            val orderDetails: OrderDetails = call.receive()
+            val orderDetails: OrderDetailsEntity = call.receive()
             TODO("Not yet implemented")
             /*
             // val createdOrder = orderService.createOrder(orderDetails.userId, orderDetails.orderingDate)
@@ -35,7 +35,7 @@ fun Route.orderRouting() {
                 "Missing orderId",
                 status = HttpStatusCode.BadRequest
             )
-            val success: Boolean = orderService.deleteOrder(id)
+            val success: Boolean = orderService.deleteOrder(id) == 1
 
             return@delete if (success) {
                 call.respondText("Order with orderID $id is deleted.", status = HttpStatusCode.OK)

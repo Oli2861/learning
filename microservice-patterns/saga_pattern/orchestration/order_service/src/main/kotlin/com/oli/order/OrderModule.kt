@@ -1,6 +1,7 @@
 package com.oli.order
 
 import com.oli.persistence.OrderDAOImpl
+import com.oli.persistence.OrderSagaAssociationDAOImpl
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import org.koin.dsl.module
@@ -13,7 +14,7 @@ fun Application.orderModule() {
     }
 }
 
-fun Application.configureOrderRouting(){
+fun Application.configureOrderRouting() {
     routing {
         orderRouting()
     }
@@ -25,8 +26,23 @@ private val orderKoinModule = module {
         OrderDAOImpl()
     }
 
+    single<OrderSagaAssociationDAO> {
+        OrderSagaAssociationDAOImpl()
+    }
+
+    single<OrderRepository> {
+        OrderRepositoryImpl(
+            orderDAO = get(),
+            orderSagaAssociationDAO = get(),
+            createOrderSagaStateDAO = get()
+        )
+    }
+
     single<OrderService> {
-        OrderService(orderDAO = get(), logger = get())
+        OrderService(
+            orderRepository = get(),
+            logger = get()
+        )
     }
 
 }

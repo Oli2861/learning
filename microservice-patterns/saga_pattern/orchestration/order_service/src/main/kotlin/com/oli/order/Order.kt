@@ -9,12 +9,6 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.javatime.timestamp
 import java.sql.Timestamp
 
-object OrderStates{
-    const val PENDING = 0
-    const val APPROVED = 1
-    const val CANCELED = 2
-}
-
 @Serializable
 data class Order(
     val id: Int,
@@ -22,11 +16,33 @@ data class Order(
     @Serializable(with = TimestampAsLongSerializer::class)
     val timestamp: Timestamp,
     val orderState: Int,
-    val items: List<Int>
-)
+    val items: List<OrderItem>
+) {
+    constructor(
+        orderEntity: OrderEntity,
+        orderItemEntities: List<OrderItemEntity>
+    ) : this(
+        orderEntity.id.value,
+        orderEntity.userId,
+        Timestamp.from(orderEntity.date),
+        orderEntity.state,
+        orderItemEntities.map { OrderItem(it) }
+    )
 
-class OrderEntity(id: EntityID<Int>): IntEntity(id){
-    companion object: IntEntityClass<OrderEntity>(Orders)
+    constructor(pair: Pair<OrderEntity, List<OrderItemEntity>>) : this(pair.first, pair.second)
+
+    fun equalsIgnoreId(other: Any?): Boolean {
+        if(other !is Order) return false
+        if(other.userId != userId) return false
+        if (other.timestamp != timestamp) return false
+        if(other.orderState != orderState) return false
+        if (other.items != items) return false
+        return true
+    }
+}
+
+class OrderEntity(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<OrderEntity>(Orders)
 
     var userId by Orders.userId
     var date by Orders.date

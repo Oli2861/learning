@@ -1,7 +1,12 @@
 package com.oli.persistence
 
 import com.oli.order.OrderItems
+import com.oli.order.OrderSagaAssociations
 import com.oli.order.Orders
+import com.oli.orderdetails.OrderDetails
+import com.oli.orderdetails.OrderDetailsEntities
+import com.oli.orderdetails.OrderDetailsItemEntities
+import com.oli.saga.CreateOrderSagaStates
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -27,7 +32,10 @@ object DatabaseFactory {
             addLogger(StdOutSqlLogger)
             SchemaUtils.create(Orders)
             SchemaUtils.create(OrderItems)
-
+            SchemaUtils.create(OrderDetailsEntities)
+            SchemaUtils.create(OrderDetailsItemEntities)
+            SchemaUtils.create(CreateOrderSagaStates)
+            SchemaUtils.create(OrderSagaAssociations)
         }
     }
 

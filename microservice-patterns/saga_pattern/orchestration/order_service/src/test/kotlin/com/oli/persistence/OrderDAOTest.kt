@@ -1,9 +1,8 @@
-package com.oli
+package com.oli.persistence
 
 import com.oli.order.Order
-import com.oli.order.OrderStates
-import com.oli.persistence.DatabaseFactory
-import com.oli.persistence.OrderDAOImpl
+import com.oli.order.OrderItem
+import com.oli.saga.EntityStates
 import kotlinx.coroutines.runBlocking
 import org.junit.BeforeClass
 import org.junit.Test
@@ -30,14 +29,11 @@ class OrderDAOTest {
             userId = 1,
             timestamp = Timestamp(System.currentTimeMillis()),
             orderState = 1,
-            items = listOf(0, 1, 5)
+            items = listOf(OrderItem(0, 1), OrderItem(2, 5), OrderItem(4, 10))
         )
-        val actual = dao.createOrder(order)!!
-        println(actual)
+        val actual = dao.createOrder(order)
         assertTrue(actual.id > 0)
-        assertEquals(order.userId, actual.userId)
-        assertEquals(order.timestamp, actual.timestamp)
-        assertEquals(order.orderState, actual.orderState)
+        assertTrue(order.equalsIgnoreId(actual))
         order.items.forEach { assertTrue(actual.items.contains(it)) }
     }
 
@@ -46,19 +42,16 @@ class OrderDAOTest {
         val order = insertSampleOrder()
         val actual = dao.readOrder(order.id)!!
         assertTrue(actual.id > 0)
-        assertEquals(order.userId, actual.userId)
-        assertEquals(order.timestamp, actual.timestamp)
-        assertEquals(order.orderState, actual.orderState)
-        order.items.forEach { assertTrue(actual.items.contains(it)) }
+        assertTrue(order.equalsIgnoreId(actual))
     }
 
     @Test
     fun testDeleteOrder() = runBlocking {
         val order = insertSampleOrder()
-        val result = dao.deleteOrder(order.id)
+        val amountOfDeletedEntries = dao.deleteOrder(order.id)
         val readAttempt = dao.readOrder(order.id)
 
-        assertTrue(result)
+        assertEquals(1, amountOfDeletedEntries)
         assertEquals(null, readAttempt)
 
     }
@@ -66,12 +59,12 @@ class OrderDAOTest {
     @Test
     fun testUpdateOrderState() = runBlocking {
         val order = insertSampleOrder()
-        val affectedRows = dao.updateOrderState(order.id, OrderStates.CANCELED)
+        val affectedRows = dao.updateOrderState(order.id, EntityStates.CANCELED)
         val updatedEntry = dao.readOrder(order.id)!!
 
         assertEquals(1, affectedRows)
         assertEquals(order.id, updatedEntry.id)
-        assertEquals(OrderStates.CANCELED, updatedEntry.orderState)
+        assertEquals(EntityStates.CANCELED, updatedEntry.orderState)
 
     }
 
@@ -80,10 +73,10 @@ class OrderDAOTest {
             id = 0,
             userId = 1,
             timestamp = Timestamp(System.currentTimeMillis()),
-            orderState = OrderStates.PENDING,
-            items = listOf(0, 1, 5)
+            orderState = EntityStates.PENDING,
+            items = listOf(OrderItem(0, 1), OrderItem(1, 2), OrderItem(5, 5))
         )
-        return dao.createOrder(order)!!
+        return dao.createOrder(order)
     }
 
 }
