@@ -11,7 +11,7 @@ class OrderRepositoryImpl(
 ) : OrderRepository {
 
     override suspend fun createOrder(sagaId: Int, order: Order): Order? {
-        val saga = createOrderSagaStateDAO.read(sagaId) ?: return null
+        val saga = createOrderSagaStateDAO.readEntity(sagaId) ?: return null
         return createOrder(saga, order)
     }
 

@@ -6,7 +6,7 @@ import com.oli.orderdetails.OrderDetails
 import com.oli.proxies.AccountingServiceProxy
 import com.oli.proxies.ConsumerServiceProxy
 import com.oli.proxies.KitchenServiceProxy
-import org.koin.logger.SLF4JLogger
+import org.slf4j.Logger
 
 /**
  * Saga to create an order.
@@ -21,8 +21,8 @@ import org.koin.logger.SLF4JLogger
  * @property saga Definition of the saga steps including transactions and compensating transactions.
  */
 class CreateOrderSagaDefinition(
-    logger: SLF4JLogger,
-    private val orderSagaState: CreateOrderSagaStateEntity,
+    logger: Logger,
+    private val orderSagaState: CreateOrderSagaState,
     private val orderDetails: OrderDetails,
     private val orderService: OrderService,
     private val consumerServiceProxy: ConsumerServiceProxy,
@@ -73,34 +73,34 @@ class CreateOrderSagaDefinition(
      * Compensate an order creation by setting its state to canceled.
      */
     private suspend fun orderServiceRejectOrder(): Boolean {
-        val affectedEntries = orderService.updateOrderState(orderSagaState.id.value, EntityStates.PENDING)
+        val affectedEntries = orderService.updateOrderState(orderSagaState.sagaId, EntityStates.PENDING)
         return affectedEntries == 1
     }
 
     private suspend fun consumerServiceVerifyConsumerDetails(): Boolean {
-        return consumerServiceProxy.verifyConsumerDetails(orderSagaState.id.value)
+        return consumerServiceProxy.verifyConsumerDetails(orderSagaState.sagaId)
     }
 
     private suspend fun kitchenServiceCreateTicket(): Boolean {
-        return kitchenServiceProxy.createTicket(orderSagaState.id.value)
+        return kitchenServiceProxy.createTicket(orderSagaState.sagaId)
     }
 
     private suspend fun kitchenServiceCancelTicket(): Boolean {
-        val affectedEntries = kitchenServiceProxy.cancelOrder(orderSagaState.id.value)
+        val affectedEntries = kitchenServiceProxy.cancelOrder(orderSagaState.sagaId)
         return affectedEntries == 1
     }
 
     private suspend fun accountingServiceAuthorize(): Boolean {
-        return accountingServiceProxy.authorize(orderSagaState.id.value, orderDetails.userId, orderDetails.paymentInfo)
+        return accountingServiceProxy.authorize(orderSagaState.sagaId, orderDetails.userId, orderDetails.paymentInfo)
     }
 
     private suspend fun kitchenServiceApproveTicket(): Boolean {
-        val affectedEntries = kitchenServiceProxy.approveTicket(orderSagaState.id.value)
+        val affectedEntries = kitchenServiceProxy.approveTicket(orderSagaState.sagaId)
         return affectedEntries == 1
     }
 
     private suspend fun orderServiceApproveTicket(): Boolean {
-        val affectedEntries = orderService.updateOrderState(orderSagaState.id.value, EntityStates.APPROVED)
+        val affectedEntries = orderService.updateOrderState(orderSagaState.sagaId, EntityStates.APPROVED)
         return affectedEntries == 1
     }
 }

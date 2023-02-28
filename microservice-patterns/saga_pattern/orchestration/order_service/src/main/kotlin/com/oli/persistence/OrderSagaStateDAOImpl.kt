@@ -1,9 +1,6 @@
 package com.oli.persistence
 
-import com.oli.saga.CreateOrderSagaStateEntity
-import com.oli.saga.CreateOrderSagaStateDAO
-import com.oli.saga.CreateOrderSagaStates
-import com.oli.saga.SagaState
+import com.oli.saga.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.update
@@ -14,17 +11,31 @@ class CreateOrderSagaStateDAOImpl : CreateOrderSagaStateDAO {
         currentStep: Int,
         rollingBack: Boolean,
         orderDetailsId: Int
-    ): CreateOrderSagaStateEntity =
+    ): CreateOrderSagaState =
         DatabaseFactory.dbQuery {
-            CreateOrderSagaStateEntity.new {
-                this.currentStep = currentStep
-                this.rollingBack = rollingBack
-                this.orderDetailsId = orderDetailsId
-            }
+            val entity = createAndReturnEntity(currentStep, rollingBack, orderDetailsId)
+            CreateOrderSagaState(entity)
         }
 
-    override suspend fun read(id: Int): CreateOrderSagaStateEntity? = DatabaseFactory.dbQuery {
-        return@dbQuery CreateOrderSagaStateEntity.find(CreateOrderSagaStates.id eq id).firstOrNull()
+    override suspend fun createAndReturnEntity(
+        currentStep: Int,
+        rollingBack: Boolean,
+        orderDetailsId: Int
+    ): CreateOrderSagaStateEntity = DatabaseFactory.dbQuery {
+        CreateOrderSagaStateEntity.new {
+            this.currentStep = currentStep
+            this.rollingBack = rollingBack
+            this.orderDetailsId = orderDetailsId
+        }
+    }
+
+    override suspend fun read(id: Int): CreateOrderSagaState? {
+        val entity = readEntity(id) ?: return null
+        return CreateOrderSagaState(entity)
+    }
+
+    override suspend fun readEntity(id: Int): CreateOrderSagaStateEntity? = DatabaseFactory.dbQuery {
+        CreateOrderSagaStateEntity.find(CreateOrderSagaStates.id eq id).firstOrNull()
     }
 
     override suspend fun delete(id: Int): Int = DatabaseFactory.dbQuery {
