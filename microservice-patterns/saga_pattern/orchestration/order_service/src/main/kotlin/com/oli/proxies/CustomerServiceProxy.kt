@@ -1,8 +1,11 @@
 package com.oli.proxies
-interface ConsumerServiceProxy{
+
+import kotlinx.serialization.Serializable
+
+interface CustomerServiceProxy{
     fun verifyConsumerDetails(sagaId: Int): Boolean
 }
-class ConsumerServiceProxyImpl: ConsumerServiceProxy{
+class CustomerServiceProxyImpl: CustomerServiceProxy{
     override fun verifyConsumerDetails(sagaId: Int): Boolean {
         return false
     }
