@@ -1,0 +1,99 @@
+services:
+  postgres:
+    image: postgres:14
+    container_name: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: ktor
+      POSTGRES_PASSWORD: ktor
+      POSTGRES_DB: ktor
+      LISTEN_ADDRESSES: localhost
+    volumes:
+      - ./volumes/postgres/data:/var/lib/postgresql/data:rw
+      - ./volumes/postgres/logs:/var/log/postgresql:rw
+    command: ["postgres", "-c", "logging_collector=true", "-c", "log_destination=csvlog", "-c", "log_statement=all", "-c", "log_directory=/var/log/postgresql", "-c", "log_filename=postgres"]
+
+  elasticsearch:
+    hostname: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.6.1
+    command: ["elasticsearch", "-Elogger.level=ERROR"]
+    container_name: elasticsearch
+    restart: unless-stopped
+    environment:
+      discovery.type: single-node
+    ports:
+      - 9200:9200
+    volumes:
+      - ./volumes/elasticsearch/data:/usr/share/elasticsearch/data
+
+  kibana:
+    hostname: kibana
+    image: docker.elastic.co/kibana/kibana-oss:7.6.1
+    container_name: kibana
+    restart: unless-stopped
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+
+  logstash:
+    hostname: logstash
+    image: docker.elastic.co/logstash/logstash-oss:6.6.2
+    container_name: logstash
+    ports:
+      - 9600:9600
+      - 8089:8089
+      - 4560:4560
+    volumes:
+      - ./logstash/pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+    environment:
+       LOG_LEVEL: warn
+
+  filebeat:
+    user: root
+    hostname: filebeat
+    image: docker.elastic.co/beats/filebeat-oss:7.1.0
+    container_name: filebeat
+    command: --strict.perms=false -e
+    volumes: 
+      - ./filebeat/filebeat.docker.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./volumes/postgres/logs:/var/log/postgresql/:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on: 
+      - postgres
+      - elasticsearch
+    environment:
+      ELASTICSEARCH_HOST: elasticsearch:9200
+      KIBANA_HOST: localhost:5601
+      LOG_LEVEL: warn
+
+
+  ktor-service:
+    build:
+      context: ./ktor-service
+    image: ktor-service
+    container_name: ktor-service
+    ports:
+      - 8080:8080
+    depends_on:
+      - logstash
+      - elasticsearch
+      - kibana
+      - postgres
+    environment:
+      LOGSTASH_HOST: logstash:4560
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ktor
+      POSTGRES_PASSWORD: ktor
+      POSTGRES_DB: ktor

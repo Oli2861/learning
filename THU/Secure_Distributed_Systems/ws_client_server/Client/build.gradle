@@ -1,0 +1,34 @@
+plugins {
+    id 'application'
+}
+
+group 'com.oli'
+version '1.0-SNAPSHOT'
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'com.oli.client.Client'
+        )
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.0'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+application {
+    mainClass = 'com.utils.client.Client'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
