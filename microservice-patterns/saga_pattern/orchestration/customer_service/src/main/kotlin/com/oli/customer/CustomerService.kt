@@ -14,8 +14,8 @@ class CustomerService(
      * @param customer The customer to be created.
      * @return ID of the created customer
      */
-    suspend fun create(customer: Customer): Int {
-        return customerDAO.create(customer).id
+    suspend fun create(customer: Customer): Int? {
+        return customerDAO.create(customer)?.id
     }
 
     /**

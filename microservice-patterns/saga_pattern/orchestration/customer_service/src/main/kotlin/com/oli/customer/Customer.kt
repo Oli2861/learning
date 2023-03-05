@@ -1,12 +1,8 @@
 package com.oli.customer
 
 import com.oli.address.Address
-import com.oli.address.AddressEntity
 import com.oli.address.containsEqualNoId
 import kotlinx.serialization.Serializable
-import org.jetbrains.exposed.dao.IntEntity
-import org.jetbrains.exposed.dao.IntEntityClass
-import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 
 @Serializable
@@ -18,12 +14,6 @@ data class Customer(
     @Serializable
     val addresses: List<Address>
 ) {
-    constructor(
-        entity: CustomerEntity,
-        addressEntities: List<AddressEntity>
-    ) : this(entity.id.value, entity.age, entity.firstName, entity.lastName, addressEntities.map { Address(it) })
-
-    constructor(entity: CustomerEntity, addressEntity: AddressEntity) : this(entity, listOf(addressEntity))
 
     /**
      * Checks whether two customers are considered to be equal.
@@ -46,14 +36,6 @@ data class CustomerNoAddress(
     val firstName: String,
     val lastName: String
 )
-
-class CustomerEntity(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<CustomerEntity>(Customers)
-
-    var age by Customers.age
-    var firstName by Customers.firstName
-    var lastName by Customers.lastName
-}
 
 object Customers : IntIdTable() {
     val age = integer("age")

@@ -15,7 +15,11 @@ fun Application.configureCustomerRouting() {
         post("/users") {
             val user = call.receive<Customer>()
             val id = service.create(user)
-            call.respond(HttpStatusCode.Created, id)
+            if(id != null){
+                call.respond(HttpStatusCode.Created, id)
+            }else{
+                call.respond(HttpStatusCode.Conflict)
+            }
         }
 
         get("/users/{id}") {

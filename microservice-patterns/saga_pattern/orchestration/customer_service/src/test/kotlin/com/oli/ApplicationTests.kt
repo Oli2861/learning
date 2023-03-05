@@ -71,6 +71,18 @@ class ApplicationTests {
     }
 
     @Test
+    fun testGetDoesNotExist() = testApplication {
+        application {
+            module(isTest = true)
+        }
+        val readResponse = client.get("/users/-1") {
+            accept(ContentType.Application.Json)
+        }
+
+        assertEquals(HttpStatusCode.NotFound, readResponse.status)
+    }
+
+    @Test
     fun updateCustomer() = testApplication {
         application {
             module(isTest = true)

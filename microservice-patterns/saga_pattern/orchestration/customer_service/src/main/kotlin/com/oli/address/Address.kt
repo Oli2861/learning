@@ -15,7 +15,6 @@ data class Address(
     val city: String,
     val houseNumber: String
 ) {
-    constructor(entity: AddressEntity) : this(entity.id.value, entity.postCode, entity.city, entity.houseNumber)
 
     fun equalsIgnoreId(other: Any?): Boolean {
         if (other !is Address) return false
@@ -31,15 +30,6 @@ fun List<Address>.containsEqualNoId(address: Address): Boolean {
         if (curr.equalsIgnoreId(address)) return true
     }
     return false
-}
-
-class AddressEntity(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<AddressEntity>(Addresses)
-
-    var customerId by Addresses.customerId references Customers.id
-    var postCode by Addresses.postCode
-    var city by Addresses.city
-    var houseNumber by Addresses.houseNumber
 }
 
 object Addresses : IntIdTable() {
