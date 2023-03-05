@@ -68,5 +68,5 @@ dependencies {
     testImplementation("org.mockito:mockito-core:$mockito_version")
 
     // In memory H2 database for testing
-    testImplementation("com.h2database:h2:$h2_version")
+    implementation("com.h2database:h2:$h2_version")
 }

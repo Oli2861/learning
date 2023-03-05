@@ -1,9 +1,9 @@
 package com.oli.persistence
 
+import com.oli.ticket.MenuItems
+import com.oli.ticket.Tickets
 import kotlinx.coroutines.Dispatchers
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.StdOutSqlLogger
-import org.jetbrains.exposed.sql.addLogger
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -14,6 +14,8 @@ object DatabaseFactory {
 
         transaction(database) {
             addLogger(StdOutSqlLogger)
+            SchemaUtils.create(Tickets)
+            SchemaUtils.create(MenuItems)
         }
     }
 
