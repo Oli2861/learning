@@ -1,6 +1,6 @@
 package com.oli.order
 
-import com.oli.orderdetails.OrderDetailsEntity
+import com.oli.orderdetails.OrderDetails
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -18,7 +18,7 @@ fun Route.orderRouting() {
     route(OrderRoutingConstants.ORDER_ROUTE_PATH) {
 
         post {
-            val orderDetails: OrderDetailsEntity = call.receive()
+            val orderDetails: OrderDetails = call.receive()
             TODO("Not yet implemented")
             /*
             // val createdOrder = orderService.createOrder(orderDetails.userId, orderDetails.orderingDate)

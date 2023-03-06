@@ -1,22 +1,20 @@
 package com.oli.order
 
-import com.oli.saga.CreateOrderSagaStateEntity
-
 interface OrderSagaAssociationDAO {
     /**
      * Create an association between an Order entity and an CreateOrderSagaState entity.
-     * @param order The associated OrderEntity.
-     * @param createOrderSagaState The associated OrderSagaStateEntity.
+     * @param orderID The associated OrderEntity.
+     * @param sagaStateId The associated OrderSagaStateEntity.
      * @return The created entry.
      */
-    suspend fun create(order: OrderEntity, createOrderSagaState: CreateOrderSagaStateEntity): OrderSagaAssociationEntity
+    suspend fun create(orderID: Int, sagaStateId: Int): OrderSagaAssociation?
 
     /**
      * Read an association for based on its saga id. Returns only one entry as this is supposed to be a 1:1 relation.
      * @param sagaId ID of the saga.
      * @return The read association or null if it does not exist.
      */
-    suspend fun readUsingSagaId(sagaId: Int): OrderSagaAssociationEntity?
+    suspend fun readUsingSagaId(sagaId: Int): OrderSagaAssociation?
 
     /**
      * Delete all associations for a given saga id.

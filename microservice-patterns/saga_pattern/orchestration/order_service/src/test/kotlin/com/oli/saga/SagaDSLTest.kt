@@ -1,6 +1,5 @@
 package com.oli.saga
 
-import com.oli.saga.saga
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

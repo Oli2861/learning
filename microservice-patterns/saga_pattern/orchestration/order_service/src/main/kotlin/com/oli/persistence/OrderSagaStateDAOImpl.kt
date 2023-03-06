@@ -1,42 +1,38 @@
 package com.oli.persistence
 
 import com.oli.saga.*
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.update
 
 class CreateOrderSagaStateDAOImpl : CreateOrderSagaStateDAO {
 
+    private fun resultRowToCreateOrderSagaState(resultRow: ResultRow) = CreateOrderSagaState(
+        sagaId = resultRow[CreateOrderSagaStates.id].value,
+        currentStep = resultRow[CreateOrderSagaStates.currentStep],
+        rollingBack = resultRow[CreateOrderSagaStates.rollingBack],
+        orderDetailsId = resultRow[CreateOrderSagaStates.orderDetailsId]?.value
+    )
+
     override suspend fun create(
-        currentStep: Int,
-        rollingBack: Boolean,
-        orderDetailsId: Int
-    ): CreateOrderSagaState =
+        createOrderSagaState: CreateOrderSagaState
+    ): CreateOrderSagaState? =
         DatabaseFactory.dbQuery {
-            val entity = createAndReturnEntity(currentStep, rollingBack, orderDetailsId)
-            CreateOrderSagaState(entity)
+            val id = CreateOrderSagaStates.insertAndGetId {
+                it[currentStep] = createOrderSagaState.currentStep
+                it[rollingBack] = createOrderSagaState.rollingBack
+                it[orderDetailsId] = createOrderSagaState.orderDetailsId
+
+            }.value
+            return@dbQuery readQuery(id)
         }
 
-    override suspend fun createAndReturnEntity(
-        currentStep: Int,
-        rollingBack: Boolean,
-        orderDetailsId: Int
-    ): CreateOrderSagaStateEntity = DatabaseFactory.dbQuery {
-        CreateOrderSagaStateEntity.new {
-            this.currentStep = currentStep
-            this.rollingBack = rollingBack
-            this.orderDetailsId = orderDetailsId
-        }
+    private fun readQuery(id: Int): CreateOrderSagaState? {
+        return CreateOrderSagaStates.select { CreateOrderSagaStates.id eq id }.map(::resultRowToCreateOrderSagaState)
+            .firstOrNull()
     }
 
-    override suspend fun read(id: Int): CreateOrderSagaState? {
-        val entity = readEntity(id) ?: return null
-        return CreateOrderSagaState(entity)
-    }
 
-    override suspend fun readEntity(id: Int): CreateOrderSagaStateEntity? = DatabaseFactory.dbQuery {
-        CreateOrderSagaStateEntity.find(CreateOrderSagaStates.id eq id).firstOrNull()
-    }
+    override suspend fun read(id: Int): CreateOrderSagaState? = DatabaseFactory.dbQuery { readQuery(id) }
 
     override suspend fun delete(id: Int): Int = DatabaseFactory.dbQuery {
         CreateOrderSagaStates.deleteWhere { CreateOrderSagaStates.id eq id }

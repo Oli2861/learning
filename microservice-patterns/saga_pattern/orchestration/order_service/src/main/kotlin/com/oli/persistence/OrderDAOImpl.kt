@@ -1,40 +1,47 @@
 package com.oli.persistence
 
 import com.oli.order.*
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.update
+import java.sql.Timestamp
 
 class OrderDAOImpl : OrderDAO {
 
-    override suspend fun createOrder(order: Order): Order = Order(createOrderReturnEntity(order))
+    private fun resultRowToOrder(resultRow: ResultRow, items: List<OrderItem>) = Order(
+        id = resultRow[Orders.id].value,
+        userId = resultRow[Orders.userId],
+        timestamp = Timestamp.from(resultRow[Orders.date]),
+        orderState = resultRow[Orders.state],
+        items = items
+    )
 
-    override suspend fun createOrderReturnEntity(order: Order): Pair<OrderEntity, List<OrderItemEntity>> {
-        val orderEntity = DatabaseFactory.dbQuery {
-            OrderEntity.new {
-                userId = order.userId
-                date = order.timestamp.toInstant()
-                state = order.orderState
+    private fun resultRowToOrderItem(resultRow: ResultRow) =
+        OrderItem(articleNumber = resultRow[OrderItems.articleNumber], amount = resultRow[OrderItems.amount])
+
+    override suspend fun createOrder(order: Order): Order? = DatabaseFactory.dbQuery {
+        val createOrderId = Orders.insertAndGetId {
+            it[userId] = order.userId
+            it[date] = order.timestamp.toInstant()
+            it[state] = order.orderState
+        }.value
+
+        order.items.forEach { orderItem ->
+            OrderItems.insert {
+                it[orderId] = createOrderId
+                it[articleNumber] = orderItem.articleNumber
+                it[amount] = orderItem.amount
             }
         }
-        val orderItemEntities = DatabaseFactory.dbQuery {
-            order.items.map { orderItem ->
-                OrderItemEntity.new {
-                    orderId = orderEntity.id
-                    articleNumber = orderItem.articleNumber
-                    amount = orderItem.amount
-                }
-            }
-        }
-        return Pair(orderEntity, orderItemEntities)
+
+        return@dbQuery readOrderQuery(createOrderId)
     }
 
-
-    override suspend fun readOrder(id: Int) = DatabaseFactory.dbQuery {
-        val orderEntity = OrderEntity.find { Orders.id eq id }.firstOrNull() ?: return@dbQuery null
-        val items = OrderItemEntity.find(OrderItems.orderId eq orderEntity.id).toList()
-        return@dbQuery Order(orderEntity, items)
+    private fun readOrderQuery(id: Int): Order? {
+        val items = OrderItems.select { OrderItems.orderId eq id }.map(::resultRowToOrderItem)
+        return Orders.select { Orders.id eq id }.map { resultRowToOrder(it, items) }.firstOrNull()
     }
+
+    override suspend fun readOrder(id: Int) = DatabaseFactory.dbQuery { readOrderQuery(id) }
 
     override suspend fun deleteOrder(id: Int): Int = DatabaseFactory.dbQuery {
         OrderItems.deleteWhere { this.orderId eq id }

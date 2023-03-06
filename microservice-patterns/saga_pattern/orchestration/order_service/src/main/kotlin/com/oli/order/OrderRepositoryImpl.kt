@@ -1,24 +1,19 @@
 package com.oli.order
 
-import com.oli.saga.CreateOrderSagaStateDAO
-import com.oli.saga.CreateOrderSagaStateEntity
-
 
 class OrderRepositoryImpl(
     private val orderDAO: OrderDAO,
-    private val orderSagaAssociationDAO: OrderSagaAssociationDAO,
-    private val createOrderSagaStateDAO: CreateOrderSagaStateDAO
+    private val orderSagaAssociationDAO: OrderSagaAssociationDAO
 ) : OrderRepository {
 
-    override suspend fun createOrder(sagaId: Int, order: Order): Order? {
-        val saga = createOrderSagaStateDAO.readEntity(sagaId) ?: return null
-        return createOrder(saga, order)
+    override suspend fun createOrder(sagaId: Int, order: Order): Pair<Order?, OrderSagaAssociation?> {
+        val createdOrder = orderDAO.createOrder(order) ?: return Pair(null, null)
+        val createdAssociation = orderSagaAssociationDAO.create(createdOrder.id, sagaId)
+        return Pair(createdOrder, createdAssociation)
     }
 
-    private suspend fun createOrder(saga: CreateOrderSagaStateEntity, order: Order): Order {
-        val (orderEntity, orderItems) = orderDAO.createOrderReturnEntity(order)
-        val orderSagaAssociation = orderSagaAssociationDAO.create(orderEntity, saga)
-        return Order(orderEntity, orderItems)
+    override suspend fun createOrder(order: Order): Order? {
+        return orderDAO.createOrder(order)
     }
 
     override suspend fun readOrder(orderId: Int): Order? {
@@ -32,7 +27,7 @@ class OrderRepositoryImpl(
 
     override suspend fun updateOrderState(sagaId: Int, orderState: Int): Int {
         val orderSagaAssociation = orderSagaAssociationDAO.readUsingSagaId(sagaId) ?: return -1
-        return orderDAO.updateOrderState(orderSagaAssociation.orderId.value, orderState)
+        return orderDAO.updateOrderState(orderSagaAssociation.orderId, orderState)
     }
 
 }

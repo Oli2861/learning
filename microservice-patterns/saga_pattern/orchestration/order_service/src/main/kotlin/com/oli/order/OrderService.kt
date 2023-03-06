@@ -1,5 +1,6 @@
 package com.oli.order
 
+import com.oli.event.Event
 import com.oli.utility.stringIdToInt
 import org.slf4j.Logger
 
@@ -8,7 +9,7 @@ class OrderService(
     private val logger: Logger
 ) {
 
-    suspend fun createOrder(sagaId: Int, order: Order): Order? {
+    suspend fun createOrder(sagaId: Int, order: Order): Pair<Order?, OrderSagaAssociation?> {
         return orderRepository.createOrder(sagaId, order)
     }
 
@@ -24,6 +25,11 @@ class OrderService(
 
     suspend fun updateOrderState(sagaId: Int, orderState: Int): Int {
         return orderRepository.updateOrderState(sagaId, orderState)
+    }
+
+    fun handleEvent(event: Event) {
+        // TODO
+
     }
 
 }

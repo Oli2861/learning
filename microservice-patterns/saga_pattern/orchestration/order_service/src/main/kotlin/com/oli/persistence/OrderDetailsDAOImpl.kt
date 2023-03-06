@@ -1,42 +1,56 @@
 package com.oli.persistence
 
-import com.oli.order.OrderItem
 import com.oli.orderdetails.*
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.deleteWhere
 import java.sql.Timestamp
 
 class OrderDetailsDAOImpl : OrderDetailsDAO {
-    override suspend fun create(
-        userId: Int,
-        paymentInfo: String,
-        articleNumbers: List<OrderItem>,
-        orderingDate: Timestamp
-    ) = DatabaseFactory.dbQuery {
-        val orderDetails = OrderDetailsEntity.new {
-            this.userId = userId
-            this.paymentInfo = paymentInfo
-            this.orderingDate = orderingDate.toInstant()
-        }
-        val orderDetailsItems = articleNumbers.map {
-            OrderDetailsItemEntity.new {
-                this.orderDetailsId = orderDetails.id
-                this.articleNumber = it.articleNumber
-                this.amount = it.amount
+
+    private fun resultRowToOrderDetails(resultRow: ResultRow, orderDetailsItems: List<OrderDetailsItem>) = OrderDetails(
+        id = resultRow[OrderDetailsTable.id].value,
+        paymentInfo = resultRow[OrderDetailsTable.paymentInfo],
+        userId = resultRow[OrderDetailsTable.userId],
+        orderDetailsItems = orderDetailsItems,
+        orderingDate = Timestamp.from(resultRow[OrderDetailsTable.orderingDate])
+    )
+
+    private fun resultRowToOrderDetailsItem(resultRow: ResultRow) = OrderDetailsItem(
+        orderDetailsId = resultRow[OrderDetailsItems.orderDetailsId].value,
+        articleNumber = resultRow[OrderDetailsItems.articleNumber],
+        amount = resultRow[OrderDetailsItems.amount]
+    )
+
+    override suspend fun create(orderDetails: OrderDetails): OrderDetails? = DatabaseFactory.dbQuery {
+        val createdOrderDetailsId = OrderDetailsTable.insertAndGetId {
+            it[userId] = orderDetails.userId
+            it[paymentInfo] = orderDetails.paymentInfo
+            it[orderingDate] = orderDetails.orderingDate.toInstant()
+
+        }.value
+        //TODO: NOT ORDER ITEMS
+        orderDetails.orderDetailsItems.forEach { orderItem ->
+            OrderDetailsItems.insert {
+                it[orderDetailsId] = createdOrderDetailsId
+                it[articleNumber] = orderItem.articleNumber
+                it[amount] = orderItem.amount
             }
+
         }
-        return@dbQuery OrderDetails(orderDetails, orderDetailsItems)
+        return@dbQuery readQuery(createdOrderDetailsId)
     }
 
-    override suspend fun read(id: Int): OrderDetails? = DatabaseFactory.dbQuery {
-        val orderDetails = OrderDetailsEntity.find(OrderDetailsEntities.id eq id).firstOrNull() ?: return@dbQuery null
-        val items =
-            OrderDetailsItemEntity.find(OrderDetailsItemEntities.orderDetailsId eq orderDetails.id.value).toList()
-        return@dbQuery OrderDetails(orderDetails, items)
+    private fun readQuery(id: Int): OrderDetails? {
+        val items = OrderDetailsItems.select { OrderDetailsItems.orderDetailsId eq id }.map(::resultRowToOrderDetailsItem)
+        return OrderDetailsTable.select { OrderDetailsTable.id eq id }.map { resultRowToOrderDetails(it, items) }
+            .firstOrNull()
     }
+
+    override suspend fun read(id: Int): OrderDetails? = DatabaseFactory.dbQuery { readQuery(id) }
+
 
     override suspend fun delete(id: Int): Boolean = DatabaseFactory.dbQuery {
-        OrderDetailsItemEntities.deleteWhere { this.orderDetailsId eq id }
-        OrderDetailsEntities.deleteWhere { this.id eq id } > 0
+        OrderDetailsItems.deleteWhere { this.orderDetailsId eq id }
+        OrderDetailsTable.deleteWhere { this.id eq id } > 0
     }
 }

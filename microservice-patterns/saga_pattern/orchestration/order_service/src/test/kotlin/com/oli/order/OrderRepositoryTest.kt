@@ -1,9 +1,9 @@
 package com.oli.order
 
-import com.oli.persistence.CreateOrderSagaStateDAOImpl
-import com.oli.persistence.DatabaseFactory
-import com.oli.persistence.OrderDAOImpl
-import com.oli.persistence.OrderSagaAssociationDAOImpl
+import com.oli.orderdetails.OrderDetails
+import com.oli.orderdetails.OrderDetailsDAO
+import com.oli.persistence.*
+import com.oli.saga.CreateOrderSagaState
 import com.oli.saga.CreateOrderSagaStateDAO
 import com.oli.saga.EntityStates
 import kotlinx.coroutines.runBlocking
@@ -18,6 +18,7 @@ import kotlin.test.assertTrue
 class OrderRepositoryTest {
     companion object {
         private lateinit var orderRepository: OrderRepository
+        private lateinit var orderDetailsDAO: OrderDetailsDAO
         private lateinit var sagaStateDAO: CreateOrderSagaStateDAO
         private lateinit var orderSagaAssociationDAO: OrderSagaAssociationDAO
         private lateinit var orderDAO: OrderDAO
@@ -25,36 +26,37 @@ class OrderRepositoryTest {
         @BeforeClass
         @JvmStatic
         fun init() {
-            DatabaseFactory.init()
+            DatabaseFactory.init(true)
+            orderDetailsDAO = OrderDetailsDAOImpl()
             sagaStateDAO = CreateOrderSagaStateDAOImpl()
             orderSagaAssociationDAO = OrderSagaAssociationDAOImpl()
             orderDAO = OrderDAOImpl()
-            orderRepository = OrderRepositoryImpl(orderDAO, orderSagaAssociationDAO, sagaStateDAO)
+            orderRepository = OrderRepositoryImpl(orderDAO, orderSagaAssociationDAO)
         }
     }
 
     @Test
     fun testCreateOrder() = runBlocking {
-        val saga = sagaStateDAO.create(0, false, 1)
+        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", 1, listOf(), Timestamp(System.currentTimeMillis())))
+        val saga = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails!!.id))
         val order = Order(1, 1, Timestamp(System.currentTimeMillis()), EntityStates.PENDING, listOf(OrderItem(1, 1)))
-        val actual = orderRepository.createOrder(saga.sagaId, order)
+        val (createdOrder: Order?, createdAssociation: OrderSagaAssociation?) = orderRepository.createOrder(saga!!.sagaId, order)
 
-        assertNotNull(actual)
-        assertTrue(order.equalsIgnoreId(actual))
+        assertNotNull(createdOrder)
+        assertTrue(order.equalsIgnoreId(createdOrder))
 
-        val association = orderSagaAssociationDAO.readUsingSagaId(saga.sagaId)
-        assertNotNull(association)
-        assertEquals(saga.sagaId, association.sagaId.value)
-        assertEquals(actual.id, association.orderId.value)
-
+        assertNotNull(createdAssociation)
+        assertEquals(saga.sagaId, createdAssociation.sagaId)
+        assertEquals(createdOrder.id, createdAssociation.orderId)
     }
 
     @Test
     fun testReadOrder() = runBlocking {
-        val saga = sagaStateDAO.create(0, false, 1)
+        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", 1, listOf(), Timestamp(System.currentTimeMillis())))
+        val saga = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails!!.id))
         val order = Order(1, 1, Timestamp(System.currentTimeMillis()), EntityStates.PENDING, listOf(OrderItem(1, 1)))
-        val created = orderRepository.createOrder(saga.sagaId, order)!!
-        val read = orderRepository.readOrder(created.id)
+        val created = orderRepository.createOrder(saga!!.sagaId, order).first
+        val read = orderRepository.readOrder(created!!.id)
 
         assertTrue(order.equalsIgnoreId(read))
         assertTrue(created.equalsIgnoreId(read))
@@ -62,9 +64,10 @@ class OrderRepositoryTest {
 
     @Test
     fun testDeleteOrder() = runBlocking {
-        val saga = sagaStateDAO.create(0, false, 1)
+        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", 1, listOf(), Timestamp(System.currentTimeMillis())))
+        val saga = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails!!.id))
         val order = Order(1, 1, Timestamp(System.currentTimeMillis()), EntityStates.PENDING, listOf(OrderItem(1, 1)))
-        val created = orderRepository.createOrder(saga.sagaId, order)!!
+        val created = orderRepository.createOrder(saga!!.sagaId, order).first!!
 
         val affectedRows = orderRepository.deleteOrder(created.id)
         assertEquals(1, affectedRows)
@@ -79,9 +82,10 @@ class OrderRepositoryTest {
 
     @Test
     fun testUpdateOrderState() = runBlocking {
-        val saga = sagaStateDAO.create(0, false, 1)
+        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", 1, listOf(), Timestamp(System.currentTimeMillis())))
+        val saga = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails!!.id))
         val order = Order(1, 1, Timestamp(System.currentTimeMillis()), EntityStates.PENDING, listOf(OrderItem(1, 1)))
-        val created = orderRepository.createOrder(saga.sagaId, order)!!
+        val created = orderRepository.createOrder(saga!!.sagaId, order).first!!
 
         val updatedRows = orderRepository.updateOrderState(saga.sagaId, EntityStates.CANCELED)
         assertEquals(1, updatedRows)

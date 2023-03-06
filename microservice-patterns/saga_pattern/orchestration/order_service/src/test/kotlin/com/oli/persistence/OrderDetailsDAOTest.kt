@@ -1,8 +1,8 @@
 package com.oli.persistence
 
-import com.oli.order.OrderItem
 import com.oli.orderdetails.OrderDetails
 import com.oli.orderdetails.OrderDetailsDAO
+import com.oli.orderdetails.OrderDetailsItem
 import kotlinx.coroutines.runBlocking
 import org.junit.BeforeClass
 import org.junit.Test
@@ -18,7 +18,7 @@ class OrderDetailsDAOTest {
         @BeforeClass
         @JvmStatic
         fun initialize() {
-            DatabaseFactory.init()
+            DatabaseFactory.init(true)
             orderDetailsDAO = OrderDetailsDAOImpl()
         }
     }
@@ -26,16 +26,12 @@ class OrderDetailsDAOTest {
     @Test
     fun testCreate() = runBlocking {
         val time = Timestamp(System.currentTimeMillis())
-        val created = orderDetailsDAO.create(
-            0,
-            "test",
-            listOf(OrderItem(1, 1), OrderItem(2, 3)),
-            time
-        )
+        val created = orderDetailsDAO.create(OrderDetails(0, "test", 1, listOf(OrderDetailsItem(0, 1, 1), OrderDetailsItem(0, 2, 3)), time))!!
 
         assertTrue(created.id >= 0)
         assertEquals("test", created.paymentInfo)
-        assertEquals(listOf(OrderItem(1, 1), OrderItem(2, 3)), created.articleNumbers)
+        assertTrue(OrderDetailsItem(100, 1, 1).equalsIgnoreOrderDetailsId(created.orderDetailsItems[0]))
+        assertTrue(OrderDetailsItem(100, 2, 3).equalsIgnoreOrderDetailsId(created.orderDetailsItems[1]))
         assertEquals(time, created.orderingDate)
     }
 }

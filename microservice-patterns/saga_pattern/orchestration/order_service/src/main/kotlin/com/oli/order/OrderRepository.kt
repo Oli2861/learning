@@ -7,7 +7,9 @@ interface OrderRepository {
      * @param order Values for the order to be created.
      * @return The stored order object or null if there is no saga for the given ID.
      */
-    suspend fun createOrder(sagaId: Int, order: Order): Order?
+    suspend fun createOrder(sagaId: Int, order: Order): Pair<Order?, OrderSagaAssociation?>
+
+    suspend fun createOrder(order: Order): Order?
 
     /**
      * Read an order from the database.

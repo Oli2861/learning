@@ -1,16 +1,17 @@
 package com.oli
 
 import com.oli.address.configureAddressRouting
-import com.oli.customer.configureCustomerRouting
 import com.oli.customer.customerModule
+import com.oli.event.MessageReceiver
 import com.oli.persistence.DatabaseFactory
+import com.oli.plugins.configureMonitoring
+import com.oli.plugins.configureSerialization
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import com.oli.plugins.*
 
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
+    embeddedServer(Netty, port = 8082, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }
 
@@ -27,4 +28,5 @@ fun Application.module(isTest: Boolean = false) {
 
     customerModule()
     configureAddressRouting()
+    MessageReceiver.init()
 }

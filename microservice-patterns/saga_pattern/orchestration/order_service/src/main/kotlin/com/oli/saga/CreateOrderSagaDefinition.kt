@@ -3,8 +3,9 @@ package com.oli.saga
 import com.oli.order.Order
 import com.oli.order.OrderService
 import com.oli.orderdetails.OrderDetails
+import com.oli.orderdetails.toOrderItems
 import com.oli.proxies.AccountingServiceProxy
-import com.oli.proxies.ConsumerServiceProxy
+import com.oli.proxies.CustomerServiceProxy
 import com.oli.proxies.KitchenServiceProxy
 import org.slf4j.Logger
 
@@ -21,11 +22,11 @@ import org.slf4j.Logger
  * @property saga Definition of the saga steps including transactions and compensating transactions.
  */
 class CreateOrderSagaDefinition(
-    logger: Logger,
+    private val logger: Logger,
     private val orderSagaState: CreateOrderSagaState,
     private val orderDetails: OrderDetails,
     private val orderService: OrderService,
-    private val consumerServiceProxy: ConsumerServiceProxy,
+    private val consumerServiceProxy: CustomerServiceProxy,
     private val kitchenServiceProxy: KitchenServiceProxy,
     private val accountingServiceProxy: AccountingServiceProxy
 ) : SagaDefinition(orderSagaState, logger, CreateOrderSagaDefinition::class.java.name) {
@@ -64,11 +65,9 @@ class CreateOrderSagaDefinition(
      * @return Whether the order was created successfully.
      */
     private suspend fun orderServiceCreateOrder(): StepResult {
-        val order =
-            Order(0, orderDetails.userId, orderDetails.orderingDate, EntityStates.PENDING, orderDetails.articleNumbers)
-        val createdOrder = orderService.createOrder(orderSagaState.sagaId, order)
-
-        return if (createdOrder == null) StepResult.FAILURE else StepResult.SUCCESS
+        val order = Order(0, orderDetails.userId, orderDetails.orderingDate, EntityStates.PENDING, orderDetails.orderDetailsItems.toOrderItems())
+        val (createdOrder, createdAssociation) = orderService.createOrder(orderSagaState.sagaId, order)
+        return if (createdOrder == null || createdAssociation == null) StepResult.FAILURE else StepResult.SUCCESS
     }
 
     /**

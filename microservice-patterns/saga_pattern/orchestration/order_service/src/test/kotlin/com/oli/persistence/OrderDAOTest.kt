@@ -17,7 +17,7 @@ class OrderDAOTest {
         @BeforeClass
         @JvmStatic
         fun initialize() {
-            DatabaseFactory.init()
+            DatabaseFactory.init(true)
             dao = OrderDAOImpl()
         }
     }
@@ -32,7 +32,7 @@ class OrderDAOTest {
             items = listOf(OrderItem(0, 1), OrderItem(2, 5), OrderItem(4, 10))
         )
         val actual = dao.createOrder(order)
-        assertTrue(actual.id > 0)
+        assertTrue(actual!!.id > 0)
         assertTrue(order.equalsIgnoreId(actual))
         order.items.forEach { assertTrue(actual.items.contains(it)) }
     }
@@ -76,7 +76,7 @@ class OrderDAOTest {
             orderState = EntityStates.PENDING,
             items = listOf(OrderItem(0, 1), OrderItem(1, 2), OrderItem(5, 5))
         )
-        return dao.createOrder(order)
+        return dao.createOrder(order)!!
     }
 
 }
