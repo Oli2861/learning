@@ -8,16 +8,16 @@ services:
     volumes:
       - ./volumes/rabbitmq:/var/lib/rabbitmq/:rw
       - ./volumes/rabbitmq/log:/var/log/rabbitmq/:rw
-  postgres_order_service:
+  postgres:
     image: postgres:15
-    container_name: postgres_order_service
+    container_name: postgres
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: ${POSTGRES_USER_ORDER_SERVICE}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_ORDER_SERVICE}
-      POSTGRES_DB: ${POSTGRES_DB_ORDER_SERVICE}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/create_tables.sql
       - ./volumes/postgres/data/order_service:/var/lib/postgresql/data:rw
       - ./volumes/postgres/logs/order_service:/var/log/postgresql:rw
   order_service:
@@ -31,12 +31,35 @@ services:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
-      POSTGRES_HOST: postgres_order_service
+      CREATE_ORDER_SAGA_COMMAND_CHANNEL: ${CREATE_ORDER_SAGA_COMMAND_CHANNEL}
+      CREATE_ORDER_SAGA_REPLY_CHANNEL: ${CREATE_ORDER_SAGA_REPLY_CHANNEL}
+      POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
-      POSTGRES_USER: ${POSTGRES_USER_ORDER_SERVICE}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_ORDER_SERVICE}
+      POSTGRES_USER: ${POSTGRES_CUSTOMER_SERVICE_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB_ORDER_SERVICE}
     depends_on:
       - rabbitmq
-      - postgres_order_service
+      - postgres
+  customer_service:
+    build:
+      context: ./customer_service
+    image: customer_service
+    container_name: customer_service
+    ports:
+      - "8082:8082"
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
+      CREATE_ORDER_SAGA_COMMAND_CHANNEL: ${CREATE_ORDER_SAGA_COMMAND_CHANNEL}
+      CREATE_ORDER_SAGA_REPLY_CHANNEL: ${CREATE_ORDER_SAGA_REPLY_CHANNEL}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER_ORDER_SERVICE}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB_CUSTOMER_SERVICE}
+    depends_on:
+      - rabbitmq
+      - postgres
 

@@ -2,7 +2,6 @@ package com.oli.plugins
 
 import com.oli.order.Order
 import com.oli.order.OrderItem
-import com.oli.plugins.TimestampAsLongSerializer
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -34,7 +33,7 @@ class SerializationTests {
     fun testDeserialize() {
         val time = 1676973532903L
         val jsonElement = Json.encodeToJsonElement(TimestampAsLongSerializer, Timestamp(time))
-        val actual = Json.decodeFromJsonElement<Timestamp>(TimestampAsLongSerializer, jsonElement)
+        val actual = Json.decodeFromJsonElement(TimestampAsLongSerializer, jsonElement)
         val expected = Timestamp(time)
         assertEquals(expected, actual)
     }

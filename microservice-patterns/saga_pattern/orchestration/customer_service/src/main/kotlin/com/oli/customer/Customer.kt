@@ -19,12 +19,18 @@ data class Customer(
      * Checks whether two customers are considered to be equal.
      */
     fun equalIgnoreId(other: Any?): Boolean {
+        if (!equalIgnoreIdAndAddresses(other)) return false
+        if (other !is Customer) return false
+        if (other.addresses.size != addresses.size) return false
+        if (!other.addresses.all { addresses.containsEqualNoId(it) }) return false
+        return true
+    }
+
+    fun equalIgnoreIdAndAddresses(other: Any?): Boolean {
         if (other !is Customer) return false
         if (other.age != age) return false
         if (other.firstName != firstName) return false
         if (other.lastName != lastName) return false
-        if (other.addresses.size != addresses.size) return false
-        if (!other.addresses.all { addresses.containsEqualNoId(it) }) return false
         return true
     }
 }

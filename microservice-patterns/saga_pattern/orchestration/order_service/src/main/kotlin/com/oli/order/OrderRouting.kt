@@ -1,6 +1,10 @@
 package com.oli.order
 
+import com.oli.event.RabbitMQBroker
 import com.oli.orderdetails.OrderDetails
+import com.oli.proxies.Address
+import com.oli.proxies.Customer
+import com.oli.proxies.CustomerServiceProxyImpl
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -56,8 +60,6 @@ fun Route.orderRouting() {
             } else {
                 call.respond(order)
             }
-
         }
-
     }
 }

@@ -2,13 +2,18 @@ package com.oli.customer
 
 import com.oli.address.Address
 import com.oli.address.AddressDAO
+import com.oli.event.*
 import org.slf4j.Logger
 
 class CustomerService(
     private val customerDAO: CustomerDAO,
     private val addressDAO: AddressDAO,
-    private val logger: Logger
+    private val logger: Logger,
+    private val messageBroker: MessageBroker
 ) {
+    private val createOrderSagaReplyChannelName =
+        System.getenv("CREATE_ORDER_SAGA_REPLY_CHANNEL") ?: "create_order_saga_reply_channel"
+
     /**
      * Create customer.
      * @param customer The customer to be created.
@@ -20,13 +25,15 @@ class CustomerService(
 
     /**
      * Verify a customer by comparing the provided object with the one stored in the database.
-     * @param customerId The customer ID used to retrieve the stored customer from the database.
      * @param customer The customer object to be compared with the stored one.
      * @return True if the provided object corresponds to the stored entity, false if not and null if there is no entity with the provided ID.
      */
-    suspend fun verify(customerId: Int, customer: Customer): Boolean? {
-        val storedCustomer: Customer = read(customerId) ?: return null
-        return customer.equalIgnoreId(storedCustomer)
+    suspend fun verify(customer: Customer): Boolean? {
+        val storedCustomer: Customer = read(customer.id) ?: return null
+        val providedAddressKnown = customer.addresses.all { provided ->
+            storedCustomer.addresses.any { stored -> stored.equalsIgnoreId(provided) }
+        }
+        return storedCustomer.equalIgnoreIdAndAddresses(customer) && providedAddressKnown
     }
 
     /**
@@ -65,4 +72,21 @@ class CustomerService(
         return customerDAO.delete(id)
     }
 
+    suspend fun handleEvent(event: Event): String {
+        logger.debug("Received event $event")
+        return when (event) {
+            is VerifyCustomerCommandEvent -> handleCustomerVerificationEvent(event)
+            else -> {
+                logger.debug("Received unknown event type. Event: $event")
+                "404"
+            }
+        }
+    }
+
+    private suspend fun handleCustomerVerificationEvent(event: VerifyCustomerCommandEvent): String {
+        val result = verify(event.customer)
+        val response = VerifyCustomerReplyEvent(event, result)
+        logger.debug("Customer verification for correlation id ${event.correlationId} completed.")
+        return EventSerializer.serialize(response)
+    }
 }

@@ -23,6 +23,12 @@ application {
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }
 
+tasks.withType<Jar> {
+    manifest {
+        attributes["Main-Class"] = application.mainClass
+    }
+}
+
 repositories {
     mavenCentral()
 }

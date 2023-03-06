@@ -1,0 +1,17 @@
+POST http://localhost:8082/users
+content-type: application/json
+
+{
+  "id": 0,
+  "age": 28,
+  "firstName": "Max",
+  "lastName": "Mustermann",
+  "addresses": [
+    {
+      "id": 0,
+      "postCode": 9123,
+      "city": "Mustertown",
+      "houseNumber": "2c"
+    }
+  ]
+}

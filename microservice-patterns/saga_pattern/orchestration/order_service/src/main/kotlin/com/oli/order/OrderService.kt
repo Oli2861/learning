@@ -1,6 +1,8 @@
 package com.oli.order
 
+import com.oli.event.CreateTicketReplyEvent
 import com.oli.event.Event
+import com.oli.event.VerifyCustomerReplyEvent
 import com.oli.utility.stringIdToInt
 import org.slf4j.Logger
 
@@ -28,8 +30,18 @@ class OrderService(
     }
 
     fun handleEvent(event: Event) {
-        // TODO
+        println("KLASHDALSKDHLASKDJHASLDHASODLIKASHDOIASDH")
+        println(logger.isDebugEnabled)
+        logger.debug("Received event $event")
+        when(event){
+            is VerifyCustomerReplyEvent -> handleVerifyCustomerReplyEvent(event)
+            is CreateTicketReplyEvent -> {}
+            else -> logger.debug("Received unhandled event $event")
+        }
+    }
 
+    private fun handleVerifyCustomerReplyEvent(event: VerifyCustomerReplyEvent) {
+        logger.debug("Received $event")
     }
 
 }

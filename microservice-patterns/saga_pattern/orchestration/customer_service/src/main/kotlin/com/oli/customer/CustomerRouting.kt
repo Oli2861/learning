@@ -35,7 +35,7 @@ fun Application.configureCustomerRouting() {
         get("/users/verify/{id}"){
             val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
             val customer = call.receive<Customer>()
-            val isOkay = service.verify(id, customer)
+            val isOkay = service.verify(customer)
             if (isOkay != null) {
                 call.respond(HttpStatusCode.OK, isOkay)
             } else {

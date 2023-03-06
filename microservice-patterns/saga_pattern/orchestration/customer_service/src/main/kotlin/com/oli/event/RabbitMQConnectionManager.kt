@@ -3,12 +3,13 @@ package com.oli.event
 import com.rabbitmq.client.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.lang.RuntimeException
 import java.nio.charset.StandardCharsets
 
 
 interface MessageBroker {
-    fun publishToQueue(queueName: String, event: VerifyCustomerEvent)
-    fun listenToQueue(queueName: String, onReceive: (String) -> Unit, onCancel: (String?) -> Unit)
+    fun publishToQueue(queueName: String, event: Event)
+    fun listenForRPC(queueName: String, onReceive: (String?, String) -> String, onCancel: () -> Unit)
 }
 
 object RabbitMQBroker : MessageBroker {
@@ -16,8 +17,9 @@ object RabbitMQBroker : MessageBroker {
         get() = establishConnection(System.getenv("RABBITMQ_HOST") ?: "localhost")
 
     private var OPEN_CHANNELS: MutableMap<Int, Channel> = mutableMapOf()
+    private val declaredQueues: MutableSet<String> = mutableSetOf()
 
-    private val EXCHANGE: String = System.getenv("RABBITMQ_EXCHANGE") ?: ""
+    private val defaultExchange: String = ""
     private const val PUBLISH_CHANNEL_ID: Int = 1
     private const val RECEIVE_CHANNEL_ID: Int = 2
 
@@ -35,30 +37,44 @@ object RabbitMQBroker : MessageBroker {
         return OPEN_CHANNELS[channelId]!!
     }
 
-    private fun publishMessage(queueName: String, message: String) {
-        val channel = getChannel(PUBLISH_CHANNEL_ID)
-        channel.queueDeclare(queueName, false, false, false, null)
-        channel.basicPublish(EXCHANGE, queueName, null, message.toByteArray())
+    private fun createQueueIfDoesNotExist(queueName: String, channel: Channel) {
+        if (!declaredQueues.contains(queueName)) {
+            channel.queueDeclare(queueName, false, false, false, null)
+            declaredQueues.add(queueName)
+        }
     }
 
-    override fun publishToQueue(queueName: String, event: VerifyCustomerEvent) {
-        val serializedEvent = Json.encodeToString(event)
-        publishMessage(queueName, serializedEvent)
+    override fun publishToQueue(queueName: String, event: Event) {
+        // TODO
     }
 
-    override fun listenToQueue(
+    override fun listenForRPC(
         queueName: String,
-        onReceive: (String) -> Unit,
-        onCancel: (String?) -> Unit
+        onReceive: (String?, String) -> String,
+        onCancel: () -> Unit
     ) {
         val channel = getChannel(RECEIVE_CHANNEL_ID)
-        channel.queueDeclare(queueName, false, false, false, null)
+        createQueueIfDoesNotExist(queueName, channel)
 
-        val deliverCallback = DeliverCallback { _: String?, delivery: Delivery ->
+        val deliverCallback = DeliverCallback { consumerTag: String?, delivery: Delivery ->
             val message = String(delivery.body, StandardCharsets.UTF_8)
-            onReceive.invoke(message)
+            val correlationId: String? = delivery.properties.correlationId
+            println("Received message with correlation id $correlationId on channel $consumerTag: $message")
+            val reply = try {
+                onReceive.invoke(correlationId, message)
+            } catch (_: RuntimeException) {
+                // TODO
+                "500"
+            }
+            val replyProps = AMQP.BasicProperties.Builder().correlationId(correlationId).build()
+            channel.basicPublish(defaultExchange, delivery.properties.replyTo, replyProps, reply.toByteArray(Charsets.UTF_8))
+            channel.basicAck(delivery.envelope.deliveryTag, false)
         }
 
-        channel.basicConsume(queueName, true, deliverCallback, onCancel)
+        val cancelCallback = CancelCallback { consumerTag ->
+            onCancel.invoke()
+        }
+
+        channel.basicConsume(queueName, true, deliverCallback, cancelCallback)
     }
 }

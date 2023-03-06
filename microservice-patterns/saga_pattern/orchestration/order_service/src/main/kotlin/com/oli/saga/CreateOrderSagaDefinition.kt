@@ -5,6 +5,7 @@ import com.oli.order.OrderService
 import com.oli.orderdetails.OrderDetails
 import com.oli.orderdetails.toOrderItems
 import com.oli.proxies.AccountingServiceProxy
+import com.oli.proxies.Customer
 import com.oli.proxies.CustomerServiceProxy
 import com.oli.proxies.KitchenServiceProxy
 import org.slf4j.Logger
@@ -79,7 +80,8 @@ class CreateOrderSagaDefinition(
     }
 
     private suspend fun consumerServiceVerifyConsumerDetails(): StepResult {
-        return if(consumerServiceProxy.verifyConsumerDetails(orderDetails.userId)) StepResult.SUCCESS else StepResult.FAILURE
+        // TODO Rework
+        return if(consumerServiceProxy.sendVerifyCustomerDetailsCommand(orderDetails.userId, orderSagaState.sagaId, Customer(orderDetails.userId, 23, "Max", "Mustermann", listOf()))) StepResult.SUCCESS else StepResult.FAILURE
     }
 
     private suspend fun kitchenServiceCreateTicket(): StepResult {

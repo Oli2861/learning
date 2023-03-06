@@ -60,7 +60,7 @@ class CreateOrderSagaTest {
             accountingServiceProxyMock
         )
 
-        Mockito.`when`(consumerServiceProxyMock.verifyConsumerDetails(orderDetails.userId)).thenReturn(true)
+        Mockito.`when`(consumerServiceProxyMock.sendVerifyCustomerDetailsCommand(orderDetails.userId)).thenReturn(true)
         Mockito.`when`(kitchenServiceProxyMock.createTicket(sagaState.sagaId)).thenReturn(true)
         Mockito.`when`(accountingServiceProxyMock.authorize(sagaState.sagaId, orderDetails.userId, orderDetails.paymentInfo)).thenReturn(true)
         Mockito.`when`(kitchenServiceProxyMock.approveTicket(sagaState.sagaId)).thenReturn(1)
@@ -88,7 +88,7 @@ class CreateOrderSagaTest {
         )
 
         // Forward step calls
-        Mockito.`when`(consumerServiceProxyMock.verifyConsumerDetails(orderDetails.userId)).thenReturn(true)
+        Mockito.`when`(consumerServiceProxyMock.sendVerifyCustomerDetailsCommand(orderDetails.userId)).thenReturn(true)
         Mockito.`when`(kitchenServiceProxyMock.createTicket(sagaState.sagaId)).thenReturn(true)
         Mockito.`when`(accountingServiceProxyMock.authorize(sagaState.sagaId, orderDetails.userId, orderDetails.paymentInfo)).thenReturn(false)
 
