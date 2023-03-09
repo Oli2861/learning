@@ -1,6 +1,8 @@
 package com.oli.persistence
 
 import com.oli.orderdetails.*
+import com.oli.proxies.Address
+import com.oli.proxies.Customer
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.sql.Timestamp
@@ -10,9 +12,21 @@ class OrderDetailsDAOImpl : OrderDetailsDAO {
     private fun resultRowToOrderDetails(resultRow: ResultRow, orderDetailsItems: List<OrderDetailsItem>) = OrderDetails(
         id = resultRow[OrderDetailsTable.id].value,
         paymentInfo = resultRow[OrderDetailsTable.paymentInfo],
-        userId = resultRow[OrderDetailsTable.userId],
-        orderDetailsItems = orderDetailsItems,
-        orderingDate = Timestamp.from(resultRow[OrderDetailsTable.orderingDate])
+        orderingDate = Timestamp.from(resultRow[OrderDetailsTable.orderingDate]),
+        customer = Customer(
+            id = resultRow[OrderDetailsTable.customerId],
+            age = resultRow[OrderDetailsTable.age],
+            firstName = resultRow[OrderDetailsTable.firstName],
+            lastName = resultRow[OrderDetailsTable.lastName],
+            addresses = listOf(
+                Address(
+                    postCode = resultRow[OrderDetailsTable.postCode],
+                    city = resultRow[OrderDetailsTable.city],
+                    houseNumber = resultRow[OrderDetailsTable.houseNumber]
+                )
+            )
+        ),
+        orderDetailsItems = orderDetailsItems
     )
 
     private fun resultRowToOrderDetailsItem(resultRow: ResultRow) = OrderDetailsItem(
@@ -23,12 +37,19 @@ class OrderDetailsDAOImpl : OrderDetailsDAO {
 
     override suspend fun create(orderDetails: OrderDetails): OrderDetails? = DatabaseFactory.dbQuery {
         val createdOrderDetailsId = OrderDetailsTable.insertAndGetId {
-            it[userId] = orderDetails.userId
             it[paymentInfo] = orderDetails.paymentInfo
             it[orderingDate] = orderDetails.orderingDate.toInstant()
 
+            it[customerId] = orderDetails.customer.id
+            it[age] = orderDetails.customer.age
+            it[firstName] = orderDetails.customer.firstName
+            it[lastName] = orderDetails.customer.lastName
+
+            it[postCode] = orderDetails.customer.addresses.first().postCode
+            it[city] = orderDetails.customer.addresses.first().city
+            it[houseNumber] = orderDetails.customer.addresses.first().houseNumber
+
         }.value
-        //TODO: NOT ORDER ITEMS
         orderDetails.orderDetailsItems.forEach { orderItem ->
             OrderDetailsItems.insert {
                 it[orderDetailsId] = createdOrderDetailsId
@@ -41,7 +62,8 @@ class OrderDetailsDAOImpl : OrderDetailsDAO {
     }
 
     private fun readQuery(id: Int): OrderDetails? {
-        val items = OrderDetailsItems.select { OrderDetailsItems.orderDetailsId eq id }.map(::resultRowToOrderDetailsItem)
+        val items =
+            OrderDetailsItems.select { OrderDetailsItems.orderDetailsId eq id }.map(::resultRowToOrderDetailsItem)
         return OrderDetailsTable.select { OrderDetailsTable.id eq id }.map { resultRowToOrderDetails(it, items) }
             .firstOrNull()
     }

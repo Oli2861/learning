@@ -1,5 +1,6 @@
 package com.oli.orderdetails
 
+import com.oli.proxies.Customer
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.javatime.timestamp
 import java.sql.Timestamp
@@ -10,16 +11,26 @@ import java.sql.Timestamp
 data class OrderDetails(
     val id: Int,
     val paymentInfo: String,
-    val userId: Int,
-    val orderDetailsItems: List<OrderDetailsItem>,
-    val orderingDate: Timestamp
+    val orderingDate: Timestamp,
+    val customer: Customer,
+    val orderDetailsItems: List<OrderDetailsItem>
 )
 
 /**
- * Exposed table definition
+ * Exposed table definition. Not necessarily a great idea to store the customer as part of the order details in this service,
+ * but it will do the trick for this learning project.
+ * Does support only one address per order.
  */
 object OrderDetailsTable : IntIdTable() {
-    val userId = integer("userId")
     val paymentInfo = varchar("paymentInfo", 128)
     val orderingDate = timestamp("orderingDate")
+
+    val customerId = integer("customerId")
+    val age = integer("age")
+    val firstName = varchar("firstName", 128)
+    val lastName = varchar("lastName", 128)
+
+    val postCode = integer("postCode")
+    val city = varchar("city", 64)
+    val houseNumber = varchar("houseNumber", 16)
 }

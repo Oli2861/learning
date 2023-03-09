@@ -6,6 +6,8 @@ import com.oli.order.OrderItem
 import com.oli.order.OrderSagaAssociationDAO
 import com.oli.orderdetails.OrderDetails
 import com.oli.orderdetails.OrderDetailsDAO
+import com.oli.proxies.Address
+import com.oli.proxies.Customer
 import com.oli.saga.CreateOrderSagaState
 import com.oli.saga.CreateOrderSagaStateDAO
 import kotlinx.coroutines.runBlocking
@@ -37,8 +39,9 @@ class OrderSagaAssociationDAOTest {
     @Test
     fun testCreate() = runBlocking {
         val order = orderDAO.createOrder(Order(0, 0, Timestamp(System.currentTimeMillis()), 0, listOf(OrderItem(1,1))))
-        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", 0, listOf(), Timestamp(System.currentTimeMillis())))
-        val createOrderSagaState = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails!!.id))
+        val customer = Customer(0, 23, "Max", "Mustermann", listOf(Address(0, 12345, "Mustertown", "5e")))
+        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", Timestamp(System.currentTimeMillis()), customer, listOf()))!!
+        val createOrderSagaState = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails.id))
         val orderSagaAssociation = orderSagaAssociationDAO.create(order!!.id, createOrderSagaState!!.sagaId)
 
         assertEquals(order.id, orderSagaAssociation!!.orderId)
@@ -47,8 +50,9 @@ class OrderSagaAssociationDAOTest {
 
     @Test
     fun testReadUsingSagaId() = runBlocking {
-        val order = orderDAO.createOrder(Order(0, 0, Timestamp(System.currentTimeMillis()), 0, listOf(OrderItem(1, 2))))
-        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", 0, listOf(), Timestamp(System.currentTimeMillis())))
+        val order = orderDAO.createOrder(Order(0, 0, Timestamp(System.currentTimeMillis()), 0, listOf(OrderItem(1,1))))
+        val customer = Customer(0, 23, "Max", "Mustermann", listOf(Address(0, 12345, "Mustertown", "5e")))
+        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", Timestamp(System.currentTimeMillis()), customer, listOf()))!!
         val createOrderSagaState = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails!!.id))
         orderSagaAssociationDAO.create(order!!.id, createOrderSagaState!!.sagaId)
         val association = orderSagaAssociationDAO.readUsingSagaId(createOrderSagaState.sagaId)!!
@@ -59,8 +63,9 @@ class OrderSagaAssociationDAOTest {
 
     @Test
     fun testDeleteAllForSaga() = runBlocking {
-        val order = orderDAO.createOrder(Order(0, 0, Timestamp(System.currentTimeMillis()), 0, listOf(OrderItem(1, 1))))
-        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", 0, listOf(), Timestamp(System.currentTimeMillis())))
+        val order = orderDAO.createOrder(Order(0, 0, Timestamp(System.currentTimeMillis()), 0, listOf(OrderItem(1,1))))
+        val customer = Customer(0, 23, "Max", "Mustermann", listOf(Address(0, 12345, "Mustertown", "5e")))
+        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", Timestamp(System.currentTimeMillis()), customer, listOf()))!!
         val createOrderSagaState = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails!!.id))
         orderSagaAssociationDAO.create(order!!.id, createOrderSagaState!!.sagaId)
 

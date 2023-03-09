@@ -106,5 +106,5 @@ object RabbitMQBroker : MessageBroker {
 
 fun main() = runBlocking {
     val customer = Customer(1, 28, "Max", "Mustermann", listOf(Address(0, 9123, "Mustertown", "2c")))
-    println(CustomerServiceProxyImpl(RabbitMQBroker).sendVerifyCustomerDetailsCommand(1, 1, customer))
+    //println(CustomerServiceProxyImpl(RabbitMQBroker).sendVerifyCustomerDetailsCommand(1, customer))
 }

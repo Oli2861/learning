@@ -66,7 +66,7 @@ class CreateOrderSagaDefinition(
      * @return Whether the order was created successfully.
      */
     private suspend fun orderServiceCreateOrder(): StepResult {
-        val order = Order(0, orderDetails.userId, orderDetails.orderingDate, EntityStates.PENDING, orderDetails.orderDetailsItems.toOrderItems())
+        val order = Order(0, orderDetails.customer.id, orderDetails.orderingDate, EntityStates.PENDING, orderDetails.orderDetailsItems.toOrderItems())
         val (createdOrder, createdAssociation) = orderService.createOrder(orderSagaState.sagaId, order)
         return if (createdOrder == null || createdAssociation == null) StepResult.FAILURE else StepResult.SUCCESS
     }
@@ -81,7 +81,7 @@ class CreateOrderSagaDefinition(
 
     private suspend fun consumerServiceVerifyConsumerDetails(): StepResult {
         // TODO Rework
-        return if(consumerServiceProxy.sendVerifyCustomerDetailsCommand(orderDetails.userId, orderSagaState.sagaId, Customer(orderDetails.userId, 23, "Max", "Mustermann", listOf()))) StepResult.SUCCESS else StepResult.FAILURE
+        return if(consumerServiceProxy.sendVerifyCustomerDetailsCommand(orderSagaState.sagaId, orderDetails.customer)) StepResult.SUCCESS else StepResult.FAILURE
     }
 
     private suspend fun kitchenServiceCreateTicket(): StepResult {
@@ -94,7 +94,7 @@ class CreateOrderSagaDefinition(
     }
 
     private suspend fun accountingServiceAuthorize(): StepResult {
-        return if(accountingServiceProxy.authorize(orderSagaState.sagaId, orderDetails.userId, orderDetails.paymentInfo)) StepResult.SUCCESS else StepResult.FAILURE
+        return if(accountingServiceProxy.authorize(orderSagaState.sagaId, orderDetails.customer.id, orderDetails.paymentInfo)) StepResult.SUCCESS else StepResult.FAILURE
     }
 
     private suspend fun kitchenServiceApproveTicket(): StepResult {

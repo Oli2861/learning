@@ -3,6 +3,8 @@ package com.oli.order
 import com.oli.orderdetails.OrderDetails
 import com.oli.orderdetails.OrderDetailsDAO
 import com.oli.persistence.*
+import com.oli.proxies.Address
+import com.oli.proxies.Customer
 import com.oli.saga.CreateOrderSagaState
 import com.oli.saga.CreateOrderSagaStateDAO
 import com.oli.saga.EntityStates
@@ -37,7 +39,8 @@ class OrderRepositoryTest {
 
     @Test
     fun testCreateOrder() = runBlocking {
-        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", 1, listOf(), Timestamp(System.currentTimeMillis())))
+        val customer = Customer(0, 23, "Max", "Mustermann", listOf(Address(0, 12345, "Mustertown", "5e")))
+        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", Timestamp(System.currentTimeMillis()), customer, listOf()))
         val saga = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails!!.id))
         val order = Order(1, 1, Timestamp(System.currentTimeMillis()), EntityStates.PENDING, listOf(OrderItem(1, 1)))
         val (createdOrder: Order?, createdAssociation: OrderSagaAssociation?) = orderRepository.createOrder(saga!!.sagaId, order)
@@ -52,7 +55,8 @@ class OrderRepositoryTest {
 
     @Test
     fun testReadOrder() = runBlocking {
-        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", 1, listOf(), Timestamp(System.currentTimeMillis())))
+        val customer = Customer(0, 23, "Max", "Mustermann", listOf(Address(0, 12345, "Mustertown", "5e")))
+        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", Timestamp(System.currentTimeMillis()), customer, listOf()))
         val saga = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails!!.id))
         val order = Order(1, 1, Timestamp(System.currentTimeMillis()), EntityStates.PENDING, listOf(OrderItem(1, 1)))
         val created = orderRepository.createOrder(saga!!.sagaId, order).first
@@ -64,7 +68,8 @@ class OrderRepositoryTest {
 
     @Test
     fun testDeleteOrder() = runBlocking {
-        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", 1, listOf(), Timestamp(System.currentTimeMillis())))
+        val customer = Customer(0, 23, "Max", "Mustermann", listOf(Address(0, 12345, "Mustertown", "5e")))
+        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", Timestamp(System.currentTimeMillis()), customer, listOf()))
         val saga = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails!!.id))
         val order = Order(1, 1, Timestamp(System.currentTimeMillis()), EntityStates.PENDING, listOf(OrderItem(1, 1)))
         val created = orderRepository.createOrder(saga!!.sagaId, order).first!!
@@ -82,7 +87,8 @@ class OrderRepositoryTest {
 
     @Test
     fun testUpdateOrderState() = runBlocking {
-        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", 1, listOf(), Timestamp(System.currentTimeMillis())))
+        val customer = Customer(0, 23, "Max", "Mustermann", listOf(Address(0, 12345, "Mustertown", "5e")))
+        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", Timestamp(System.currentTimeMillis()), customer, listOf()))
         val saga = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails!!.id))
         val order = Order(1, 1, Timestamp(System.currentTimeMillis()), EntityStates.PENDING, listOf(OrderItem(1, 1)))
         val created = orderRepository.createOrder(saga!!.sagaId, order).first!!

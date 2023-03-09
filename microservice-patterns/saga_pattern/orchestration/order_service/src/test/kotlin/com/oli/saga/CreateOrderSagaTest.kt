@@ -5,9 +5,7 @@ import com.oli.orderdetails.OrderDetails
 import com.oli.orderdetails.OrderDetailsDAO
 import com.oli.orderdetails.OrderDetailsItem
 import com.oli.persistence.*
-import com.oli.proxies.AccountingServiceProxy
-import com.oli.proxies.CustomerServiceProxy
-import com.oli.proxies.KitchenServiceProxy
+import com.oli.proxies.*
 import kotlinx.coroutines.runBlocking
 import org.junit.BeforeClass
 import org.junit.Test
@@ -47,7 +45,8 @@ class CreateOrderSagaTest {
 
     @Test
     fun testStep() = runBlocking {
-        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "test",1,  listOf(OrderDetailsItem(0, 1, 1)), Timestamp(System.currentTimeMillis())))!!
+        val customer = Customer(0, 23, "Max", "Mustermann", listOf(Address(0, 12345, "Mustertown", "5e")))
+        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "test",Timestamp(System.currentTimeMillis()),  customer, listOf(OrderDetailsItem(0, 1, 1))))!!
         val sagaState = createOrderSagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails.id))!!
         // Mock for remote services, actual service for order service
         sagaDefinition = CreateOrderSagaDefinition(
@@ -60,9 +59,9 @@ class CreateOrderSagaTest {
             accountingServiceProxyMock
         )
 
-        Mockito.`when`(consumerServiceProxyMock.sendVerifyCustomerDetailsCommand(orderDetails.userId)).thenReturn(true)
+        Mockito.`when`(consumerServiceProxyMock.sendVerifyCustomerDetailsCommand(sagaState.sagaId, customer)).thenReturn(true)
         Mockito.`when`(kitchenServiceProxyMock.createTicket(sagaState.sagaId)).thenReturn(true)
-        Mockito.`when`(accountingServiceProxyMock.authorize(sagaState.sagaId, orderDetails.userId, orderDetails.paymentInfo)).thenReturn(true)
+        Mockito.`when`(accountingServiceProxyMock.authorize(sagaState.sagaId, orderDetails.customer.id, orderDetails.paymentInfo)).thenReturn(true)
         Mockito.`when`(kitchenServiceProxyMock.approveTicket(sagaState.sagaId)).thenReturn(1)
 
         for(i in 0..4){
@@ -74,7 +73,8 @@ class CreateOrderSagaTest {
 
     @Test
     fun testRollback() = runBlocking {
-        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "test", 1, listOf(OrderDetailsItem(0, 1, 1)), Timestamp(System.currentTimeMillis())))!!
+        val customer = Customer(0, 23, "Max", "Mustermann", listOf(Address(0, 12345, "Mustertown", "5e")))
+        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "test",Timestamp(System.currentTimeMillis()),  customer, listOf(OrderDetailsItem(0, 1, 1))))!!
         val sagaState = createOrderSagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails.id))!!
         // Mock for remote services, actual service for order service
         val sagaDefinition = CreateOrderSagaDefinition(
@@ -88,9 +88,9 @@ class CreateOrderSagaTest {
         )
 
         // Forward step calls
-        Mockito.`when`(consumerServiceProxyMock.sendVerifyCustomerDetailsCommand(orderDetails.userId)).thenReturn(true)
+        Mockito.`when`(consumerServiceProxyMock.sendVerifyCustomerDetailsCommand(sagaState.sagaId, customer)).thenReturn(true)
         Mockito.`when`(kitchenServiceProxyMock.createTicket(sagaState.sagaId)).thenReturn(true)
-        Mockito.`when`(accountingServiceProxyMock.authorize(sagaState.sagaId, orderDetails.userId, orderDetails.paymentInfo)).thenReturn(false)
+        Mockito.`when`(accountingServiceProxyMock.authorize(sagaState.sagaId, orderDetails.customer.id, orderDetails.paymentInfo)).thenReturn(false)
 
         for(i in 0..2){
             val retVal = sagaDefinition.step()
