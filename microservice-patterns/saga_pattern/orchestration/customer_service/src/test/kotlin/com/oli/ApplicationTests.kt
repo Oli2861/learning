@@ -13,14 +13,14 @@ import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
-import kotlin.test.assertTrue
 
 class ApplicationTests {
     @Test
     fun testCreateCustomer() = testApplication {
         application {
             // True to use h2 in-memory db instead of postgres
-            module(isTest = true)
+            // Don't listen to message broker messages in testing scenarios
+            module(true, false)
         }
 
         // Create customer
@@ -42,7 +42,7 @@ class ApplicationTests {
     @Test
     fun testGetCustomer() = testApplication {
         application {
-            module(isTest = true)
+            module(true, false)
         }
 
         // Create customer
@@ -73,7 +73,7 @@ class ApplicationTests {
     @Test
     fun testGetDoesNotExist() = testApplication {
         application {
-            module(isTest = true)
+            module(true, false)
         }
         val readResponse = client.get("/users/-1") {
             accept(ContentType.Application.Json)
@@ -85,7 +85,7 @@ class ApplicationTests {
     @Test
     fun updateCustomer() = testApplication {
         application {
-            module(isTest = true)
+            module(true, false)
         }
 
         // Create customer
@@ -124,7 +124,7 @@ class ApplicationTests {
     @Test
     fun testDelete() = testApplication {
         application {
-            module(isTest = true)
+            module(true, false)
         }
 
         // Create customer
@@ -155,26 +155,25 @@ class ApplicationTests {
     @Test
     fun testVerifyCustomerSuccess() = testApplication{
         application {
-            module(true)
+            module(true, false)
         }
 
-        // Create customer
-        val customer = Json.encodeToString(
-            Customer(
-                age = 22, firstName = "Max", lastName = "Mustermann", addresses = listOf(
-                    Address(postCode = 8123, city = "Testing Town", houseNumber = "93a")
-                )
+        val customer = Customer(
+            age = 22, firstName = "Max", lastName = "Mustermann", addresses = listOf(
+                Address(postCode = 8123, city = "Testing Town", houseNumber = "93a")
             )
         )
+        // Create customer
+        val encoded = Json.encodeToString(customer)
         val created = client.post("/users") {
             contentType(ContentType.Application.Json)
-            setBody(customer)
+            setBody(encoded)
         }
         val id = created.bodyAsText().toInt()
 
         // Test whether the created customer corresponds with the provided one
-        val customer1 = customer
-        val comparisonReponse = client.get("/users/verify/$id"){
+        val customer1 = Json.encodeToString(Customer(id, customer.age, customer.firstName, customer.lastName, customer.addresses))
+        val comparisonReponse = client.get("/users/verify"){
             contentType(ContentType.Application.Json)
             setBody(customer1)
         }
@@ -186,32 +185,28 @@ class ApplicationTests {
     @Test
     fun testVerifyCustomerFail() = testApplication{
         application {
-            module(true)
+            module(true, false)
         }
 
-        // Create customer
-        val customer = Json.encodeToString(
-            Customer(
-                age = 22, firstName = "Max", lastName = "Mustermann", addresses = listOf(
-                    Address(postCode = 8123, city = "Testing Town", houseNumber = "93a")
-                )
+        val customer = Customer(
+            age = 22, firstName = "Max", lastName = "Mustermann", addresses = listOf(
+                Address(postCode = 8123, city = "Testing Town", houseNumber = "93a")
             )
         )
         val created = client.post("/users") {
             contentType(ContentType.Application.Json)
-            setBody(customer)
+            setBody(Json.encodeToString(customer))
         }
         val id = created.bodyAsText().toInt()
 
         // Test whether the created customer corresponds with the provided one
         val customer1 = Json.encodeToString(
-            Customer(
-                age = 22, firstName = "Max", lastName = "Mustermann", addresses = listOf(
+            Customer(id = id, age = 22, firstName = "Max", lastName = "Mustermann", addresses = listOf(
                     Address(postCode = 8123, city = "Mustertown", houseNumber = "93a")
                 )
             )
         )
-        val comparisonReponse = client.get("/users/verify/$id"){
+        val comparisonReponse = client.get("/users/verify"){
             contentType(ContentType.Application.Json)
             setBody(customer1)
         }
@@ -223,7 +218,7 @@ class ApplicationTests {
     @Test
     fun testUpdateAddress() = testApplication {
         application {
-            module(true)
+            module(true, false)
         }
 
         // Create customer

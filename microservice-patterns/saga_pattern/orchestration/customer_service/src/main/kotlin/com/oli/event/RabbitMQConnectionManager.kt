@@ -1,15 +1,17 @@
 package com.oli.event
 
 import com.rabbitmq.client.*
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.lang.RuntimeException
 import java.nio.charset.StandardCharsets
 
 
 interface MessageBroker {
     fun publishToQueue(queueName: String, event: Event)
-    fun listenForRPC(queueName: String, onReceive: (String?, String) -> String, onCancel: () -> Unit)
+    fun listenForRPC(scope: CoroutineScope, queueName: String, onReceive: suspend (String?, String) -> String, onCancel: () -> Unit)
 }
 
 object RabbitMQBroker : MessageBroker {
@@ -49,31 +51,27 @@ object RabbitMQBroker : MessageBroker {
     }
 
     override fun listenForRPC(
+        scope: CoroutineScope,
         queueName: String,
-        onReceive: (String?, String) -> String,
+        onReceive: suspend (String?, String) -> String,
         onCancel: () -> Unit
     ) {
         val channel = getChannel(RECEIVE_CHANNEL_ID)
         createQueueIfDoesNotExist(queueName, channel)
 
         val deliverCallback = DeliverCallback { consumerTag: String?, delivery: Delivery ->
-            val message = String(delivery.body, StandardCharsets.UTF_8)
-            val correlationId: String? = delivery.properties.correlationId
-            println("Received message with correlation id $correlationId on channel $consumerTag: $message")
-            val reply = try {
-                onReceive.invoke(correlationId, message)
-            } catch (_: RuntimeException) {
-                // TODO
-                "500"
+            scope.launch {
+                val message = String(delivery.body, StandardCharsets.UTF_8)
+                val correlationId: String? = delivery.properties.correlationId
+                val reply = try { onReceive(correlationId, message)
+                } catch (_: RuntimeException) { "500" }
+                val replyProps = AMQP.BasicProperties.Builder().correlationId(correlationId).build()
+                channel.basicPublish(defaultExchange, delivery.properties.replyTo, replyProps, reply.toByteArray(Charsets.UTF_8))
+                channel.basicAck(delivery.envelope.deliveryTag, false)
             }
-            val replyProps = AMQP.BasicProperties.Builder().correlationId(correlationId).build()
-            channel.basicPublish(defaultExchange, delivery.properties.replyTo, replyProps, reply.toByteArray(Charsets.UTF_8))
-            channel.basicAck(delivery.envelope.deliveryTag, false)
         }
 
-        val cancelCallback = CancelCallback { consumerTag ->
-            onCancel.invoke()
-        }
+        val cancelCallback = CancelCallback { consumerTag -> onCancel.invoke() }
 
         channel.basicConsume(queueName, true, deliverCallback, cancelCallback)
     }

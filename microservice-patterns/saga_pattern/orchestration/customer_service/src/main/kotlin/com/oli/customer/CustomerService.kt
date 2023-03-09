@@ -72,10 +72,10 @@ class CustomerService(
         return customerDAO.delete(id)
     }
 
-    suspend fun handleEvent(event: Event): String {
+    suspend fun handleEvent(correlationId: String, event: Event): String {
         logger.debug("Received event $event")
         return when (event) {
-            is VerifyCustomerCommandEvent -> handleCustomerVerificationEvent(event)
+            is VerifyCustomerCommandEvent -> handleCustomerVerificationEvent(correlationId, event)
             else -> {
                 logger.debug("Received unknown event type. Event: $event")
                 "404"
@@ -83,10 +83,10 @@ class CustomerService(
         }
     }
 
-    private suspend fun handleCustomerVerificationEvent(event: VerifyCustomerCommandEvent): String {
+    private suspend fun handleCustomerVerificationEvent(correlationId: String, event: VerifyCustomerCommandEvent): String {
         val result = verify(event.customer)
         val response = VerifyCustomerReplyEvent(event, result)
-        logger.debug("Customer verification for correlation id ${event.correlationId} completed.")
+        logger.debug("Customer verification for correlation id $correlationId completed.")
         return EventSerializer.serialize(response)
     }
 }

@@ -9,6 +9,8 @@ import com.oli.plugins.configureSerialization
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
 fun main() {
     embeddedServer(Netty, port = 8082, host = "0.0.0.0", module = Application::module)
@@ -17,10 +19,11 @@ fun main() {
 
 /**
  * Base module of the application. Configures all submodules.
- * @param isTest Whether the application is being tested. This is relevant, as the DatabaseFactory will use an embedded H2 in memory database instead of a postgres.
+ * @param useEmbedded Whether the application is being tested. This is relevant, as the DatabaseFactory will use an embedded H2 in memory database instead of a postgres.
+ * @param listenToMessages Whether to listen to messages from the message broker.
  */
-fun Application.module(isTest: Boolean = false) {
-    DatabaseFactory.init(isTest)
+fun Application.module(useEmbedded: Boolean = false, listenToMessages: Boolean = true) {
+    DatabaseFactory.init(useEmbedded)
     configureKoin()
 
     configureMonitoring()
@@ -28,5 +31,7 @@ fun Application.module(isTest: Boolean = false) {
 
     customerModule()
     configureAddressRouting()
-    MessageReceiver.init()
+
+    if(listenToMessages)
+    MessageReceiver.init(CoroutineScope(this.coroutineContext + Dispatchers.IO))
 }
