@@ -9,6 +9,7 @@ class TicketDAOImpl : TicketDAO {
         return Ticket(
             id = resultRow[Tickets.id].value,
             customerId = resultRow[Tickets.customerId],
+            sagaId = resultRow[Tickets.sagaId],
             state = resultRow[Tickets.state],
             items = items
         )
@@ -16,7 +17,7 @@ class TicketDAOImpl : TicketDAO {
 
     private fun resultRowToMenuItem(resultRow: ResultRow): MenuItem = MenuItem(
         ticketId = resultRow[MenuItems.ticketId].value,
-        itemId = resultRow[MenuItems.itemId],
+        articleNumber = resultRow[MenuItems.itemId],
         amount = resultRow[MenuItems.amount]
     )
 
@@ -25,19 +26,20 @@ class TicketDAOImpl : TicketDAO {
             Tickets.insertAndGetId {
                 it[customerId] = ticket.customerId
                 it[state] = ticket.state
+                it[sagaId] = ticket.sagaId
             }
         ticket.items.map { menuItem ->
             MenuItems.insert {
                 it[ticketId] = createdTicketId.value
-                it[itemId] = menuItem.itemId
+                it[itemId] = menuItem.articleNumber
                 it[amount] = menuItem.amount
             }
         }
         return@dbQuery readQuery(createdTicketId.value)
     }
 
-    override suspend fun updateState(ticketId: Int, entityState: Int): Int = DatabaseFactory.dbQuery {
-        Tickets.update({ Tickets.id eq ticketId }) {
+    override suspend fun updateState(sagaId: Int, entityState: Int): Int = DatabaseFactory.dbQuery {
+        Tickets.update({ Tickets.sagaId eq sagaId }) {
             it[state] = entityState
         }
     }

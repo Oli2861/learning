@@ -1,27 +1,22 @@
 package com.oli.event
 
-import com.oli.proxies.Address
-import com.oli.proxies.Customer
-import com.oli.proxies.CustomerServiceProxyImpl
 import com.rabbitmq.client.*
-import kotlinx.coroutines.runBlocking
-import org.koin.java.KoinJavaComponent.inject
-import org.slf4j.Logger
-import java.nio.charset.StandardCharsets
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
+
 interface MessageBroker {
-    fun listenForRPC(queueName: String, onReceive: (String?, String) -> Unit, onCancel: () -> Unit)
     suspend fun remoteProcedureCall(queueName: String, replyQueueName: String, event: Event): String?
+    fun listenForRPC(scope: CoroutineScope, queueName: String, onReceive: suspend (String, Event) -> Event, onCancel: () -> Unit)
 }
 
 object RabbitMQBroker : MessageBroker {
-    private val logger by inject<Logger>(Logger::class.java)
     private val CONNECTION_INSTANCE: Connection
         get() = establishConnection(System.getenv("RABBITMQ_HOST") ?: "localhost")
 
-    private val openChannels: MutableMap<Int, Channel> = mutableMapOf()
+    private var OPEN_CHANNELS: MutableMap<Int, Channel> = mutableMapOf()
     private val declaredQueues: MutableSet<String> = mutableSetOf()
 
     private val defaultExchange: String = ""
@@ -35,11 +30,11 @@ object RabbitMQBroker : MessageBroker {
     }
 
     private fun getChannel(channelId: Int): Channel {
-        if (openChannels[channelId] == null) {
+        if (OPEN_CHANNELS[channelId] == null) {
             val channel = CONNECTION_INSTANCE.createChannel(channelId)
-            openChannels[channelId] = channel
+            OPEN_CHANNELS[channelId] = channel
         }
-        return openChannels[channelId]!!
+        return OPEN_CHANNELS[channelId]!!
     }
 
     private fun createQueueIfDoesNotExist(queueName: String, channel: Channel) {
@@ -59,52 +54,47 @@ object RabbitMQBroker : MessageBroker {
         val correlationId = UUID.randomUUID().toString()
         val properties = AMQP.BasicProperties.Builder().correlationId(correlationId).replyTo(replyQueueName).build()
         channel.basicPublish(defaultExchange, queueName, properties, message.toByteArray())
-        println("Send message $message")
-
-        return waitForResponse(replyChannel, replyQueueName, correlationId)
-    }
-
-    // TODO: This is blocking!
-    private fun waitForResponse(replyChannel: Channel, replyQueueName: String, correlationId: String): String? {
         val response = CompletableFuture<String>();
-        replyChannel.basicConsume(replyQueueName, true,
+        val consumerTag = channel.basicConsume(replyQueueName, true,
             { consumerTag: String?, delivery: Delivery ->
-                if (delivery.properties.correlationId.equals(correlationId)) {
+                if (delivery.properties.correlationId == correlationId) {
                     response.complete(String(delivery.body, Charsets.UTF_8))
                 }
             }
-        ) { consumerTag: String? ->
-        }
-        return response.get()
+        ) { consumerTag: String? -> }
+        val result = response.get()
+        channel.basicCancel(consumerTag)
+        return result
     }
 
     override fun listenForRPC(
+        scope: CoroutineScope,
         queueName: String,
-        onReceive: (String?, String) -> Unit,
+        onReceive: suspend (String, Event) -> Event,
         onCancel: () -> Unit
     ) {
         val channel = getChannel(RECEIVE_CHANNEL_ID)
-        channel.exchangeDeclare(defaultExchange, BuiltinExchangeType.DIRECT)
-        createQueueIfDoesNotExist(queueName, channel)
+        channel.queueDeclare(queueName, false, false, false, null)
 
         val deliverCallback = DeliverCallback { consumerTag: String?, delivery: Delivery ->
-            val message = String(delivery.body, StandardCharsets.UTF_8)
-            val correlationId: String? = delivery.properties.correlationId
-            logger.debug("Received message with correlation id $correlationId on channel $consumerTag: $message")
-            onReceive.invoke(correlationId, message)
-        }
+            scope.launch {
+                val replyProps = AMQP.BasicProperties.Builder()
+                    .correlationId(delivery.properties.correlationId)
+                    .build()
+                val response = try {
+                    val contents = String(delivery.body, Charsets.UTF_8)
+                    val event = EventSerializer.deserialize(contents)
+                    EventSerializer.serialize(onReceive(delivery.properties.correlationId, event))
+                } catch (e: RuntimeException) {
+                    e.printStackTrace()
+                    EventSerializer.serialize(ErrorEvent(e.stackTraceToString()))
+                }
 
-        val cancelCallback = CancelCallback { consumerTag ->
-            logger.debug("Channel $consumerTag closed.")
-            onCancel.invoke()
+                channel.basicPublish(defaultExchange, delivery.properties.replyTo, replyProps, response.toByteArray(Charsets.UTF_8))
+                channel.basicAck(delivery.envelope.deliveryTag, false)
+            }
         }
-
-        channel.basicConsume(queueName, true, deliverCallback, cancelCallback)
+        channel.basicConsume(queueName, false, deliverCallback, { consumerTag -> onCancel })
     }
 
-}
-
-fun main() = runBlocking {
-    val customer = Customer(1, 28, "Max", "Mustermann", listOf(Address(0, 9123, "Mustertown", "2c")))
-    //println(CustomerServiceProxyImpl(RabbitMQBroker).sendVerifyCustomerDetailsCommand(1, customer))
 }

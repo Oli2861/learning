@@ -28,7 +28,7 @@ object DatabaseFactory {
         val user = System.getenv("POSTGRES_USER")
         val password = System.getenv("POSTGRES_PASSWORD")
         val databaseName = System.getenv("POSTGRES_DB")
-
+        println("jdbc:postgresql://$host:$port/$databaseName?user=$user&password=$password")
         return Database.connect(
             url = "jdbc:postgresql://$host:$port/$databaseName?user=$user&password=$password",
             driver = "org.postgresql.Driver"

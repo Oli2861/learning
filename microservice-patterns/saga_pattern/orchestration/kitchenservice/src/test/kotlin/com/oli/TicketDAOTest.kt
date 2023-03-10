@@ -25,14 +25,14 @@ class TicketDAOTest {
 
     @Test
     fun createTest() = runBlocking {
-        val ticket = Ticket(0, 1, 2, listOf(MenuItem(0, 10, 2), MenuItem(0, 20, 3)))
+        val ticket = Ticket(0, 1, 2, 1, listOf(MenuItem(0, 10, 2), MenuItem(0, 20, 3)))
         val created = ticketDAO.create(ticket)
         assertTrue(ticket.equalsIgnoreTicketId(created))
     }
 
     @Test
     fun readTest() = runBlocking{
-        val ticket = Ticket(0, 1, 2, listOf(MenuItem(0, 10, 2), MenuItem(0, 20, 3)))
+        val ticket = Ticket(0, 1, 2, 1, listOf(MenuItem(0, 10, 2), MenuItem(0, 20, 3)))
         val created = ticketDAO.create(ticket)
         val read = ticketDAO.read(created!!.id)
 
@@ -41,10 +41,10 @@ class TicketDAOTest {
 
     @Test
     fun updateStateTest() = runBlocking{
-        val ticket = Ticket(0, 1, 2, listOf(MenuItem(0, 10, 2), MenuItem(0, 20, 3)))
+        val ticket = Ticket(0, 1, 2, 1, listOf(MenuItem(0, 10, 2), MenuItem(0, 20, 3)))
         val created = ticketDAO.create(ticket)
         val updated = ticketDAO.updateState(created!!.id, 0)
-        val read = ticketDAO.read(created!!.id)
+        val read = ticketDAO.read(created.id)
 
         assertEquals(1, updated)
         assertEquals(0, read!!.state)

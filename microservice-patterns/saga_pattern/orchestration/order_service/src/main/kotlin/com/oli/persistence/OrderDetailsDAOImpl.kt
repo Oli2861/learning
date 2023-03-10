@@ -9,7 +9,7 @@ import java.sql.Timestamp
 
 class OrderDetailsDAOImpl : OrderDetailsDAO {
 
-    private fun resultRowToOrderDetails(resultRow: ResultRow, orderDetailsItems: List<OrderDetailsItem>) = OrderDetails(
+    private fun resultRowToOrderDetails(resultRow: ResultRow, menuItems: List<MenuItem>) = OrderDetails(
         id = resultRow[OrderDetailsTable.id].value,
         paymentInfo = resultRow[OrderDetailsTable.paymentInfo],
         orderingDate = Timestamp.from(resultRow[OrderDetailsTable.orderingDate]),
@@ -26,13 +26,12 @@ class OrderDetailsDAOImpl : OrderDetailsDAO {
                 )
             )
         ),
-        orderDetailsItems = orderDetailsItems
+        menuItems = menuItems
     )
 
-    private fun resultRowToOrderDetailsItem(resultRow: ResultRow) = OrderDetailsItem(
-        orderDetailsId = resultRow[OrderDetailsItems.orderDetailsId].value,
-        articleNumber = resultRow[OrderDetailsItems.articleNumber],
-        amount = resultRow[OrderDetailsItems.amount]
+    private fun resultRowToOrderDetailsItem(resultRow: ResultRow) = MenuItem(
+        articleNumber = resultRow[MenuItems.articleNumber],
+        amount = resultRow[MenuItems.amount]
     )
 
     override suspend fun create(orderDetails: OrderDetails): OrderDetails? = DatabaseFactory.dbQuery {
@@ -50,8 +49,8 @@ class OrderDetailsDAOImpl : OrderDetailsDAO {
             it[houseNumber] = orderDetails.customer.addresses.first().houseNumber
 
         }.value
-        orderDetails.orderDetailsItems.forEach { orderItem ->
-            OrderDetailsItems.insert {
+        orderDetails.menuItems.forEach { orderItem ->
+            MenuItems.insert {
                 it[orderDetailsId] = createdOrderDetailsId
                 it[articleNumber] = orderItem.articleNumber
                 it[amount] = orderItem.amount
@@ -63,7 +62,7 @@ class OrderDetailsDAOImpl : OrderDetailsDAO {
 
     private fun readQuery(id: Int): OrderDetails? {
         val items =
-            OrderDetailsItems.select { OrderDetailsItems.orderDetailsId eq id }.map(::resultRowToOrderDetailsItem)
+            MenuItems.select { MenuItems.orderDetailsId eq id }.map(::resultRowToOrderDetailsItem)
         return OrderDetailsTable.select { OrderDetailsTable.id eq id }.map { resultRowToOrderDetails(it, items) }
             .firstOrNull()
     }
@@ -72,7 +71,7 @@ class OrderDetailsDAOImpl : OrderDetailsDAO {
 
 
     override suspend fun delete(id: Int): Boolean = DatabaseFactory.dbQuery {
-        OrderDetailsItems.deleteWhere { this.orderDetailsId eq id }
+        MenuItems.deleteWhere { this.orderDetailsId eq id }
         OrderDetailsTable.deleteWhere { this.id eq id } > 0
     }
 }

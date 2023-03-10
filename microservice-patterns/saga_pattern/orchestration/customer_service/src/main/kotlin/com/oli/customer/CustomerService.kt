@@ -8,8 +8,7 @@ import org.slf4j.Logger
 class CustomerService(
     private val customerDAO: CustomerDAO,
     private val addressDAO: AddressDAO,
-    private val logger: Logger,
-    private val messageBroker: MessageBroker
+    private val logger: Logger
 ) {
     private val createOrderSagaReplyChannelName =
         System.getenv("CREATE_ORDER_SAGA_REPLY_CHANNEL") ?: "create_order_saga_reply_channel"
@@ -60,7 +59,7 @@ class CustomerService(
      * @return The amount of affected entries.
      */
     suspend fun updateAddress(address: Address): Boolean {
-        return addressDAO.update(address) == 1
+        return addressDAO.update(address) >= 1
     }
 
     /**
@@ -72,21 +71,24 @@ class CustomerService(
         return customerDAO.delete(id)
     }
 
-    suspend fun handleEvent(correlationId: String, event: Event): String {
+    suspend fun handleEvent(correlationId: String, event: Event): Event {
         logger.debug("Received event $event")
         return when (event) {
             is VerifyCustomerCommandEvent -> handleCustomerVerificationEvent(correlationId, event)
-            else -> {
-                logger.debug("Received unknown event type. Event: $event")
-                "404"
-            }
+            else -> handleUnknownEvent(correlationId, event)
         }
     }
 
-    private suspend fun handleCustomerVerificationEvent(correlationId: String, event: VerifyCustomerCommandEvent): String {
-        val result = verify(event.customer)
-        val response = VerifyCustomerReplyEvent(event, result)
-        logger.debug("Customer verification for correlation id $correlationId completed.")
-        return EventSerializer.serialize(response)
+    private suspend fun handleCustomerVerificationEvent(correlationId: String, event: VerifyCustomerCommandEvent): ReplyEvent {
+        val result = verify(event.customer) ?: false
+        val response = ReplyEvent(event.sagaId, result)
+        logger.debug("CorrelationId: $correlationId. Customer verification for completed.")
+        return response
+    }
+
+    private fun handleUnknownEvent(correlationId: String, event: Event): ErrorEvent {
+        val msg = "Correlation id: $correlationId. Received unknown event type. Event: $event"
+        logger.debug(msg)
+        return ErrorEvent(msg)
     }
 }

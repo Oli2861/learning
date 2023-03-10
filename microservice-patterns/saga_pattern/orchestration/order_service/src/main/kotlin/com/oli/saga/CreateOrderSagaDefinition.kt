@@ -5,7 +5,6 @@ import com.oli.order.OrderService
 import com.oli.orderdetails.OrderDetails
 import com.oli.orderdetails.toOrderItems
 import com.oli.proxies.AccountingServiceProxy
-import com.oli.proxies.Customer
 import com.oli.proxies.CustomerServiceProxy
 import com.oli.proxies.KitchenServiceProxy
 import org.slf4j.Logger
@@ -66,7 +65,7 @@ class CreateOrderSagaDefinition(
      * @return Whether the order was created successfully.
      */
     private suspend fun orderServiceCreateOrder(): StepResult {
-        val order = Order(0, orderDetails.customer.id, orderDetails.orderingDate, EntityStates.PENDING, orderDetails.orderDetailsItems.toOrderItems())
+        val order = Order(0, orderDetails.customer.id, orderDetails.orderingDate, EntityStates.PENDING, orderDetails.menuItems.toOrderItems())
         val (createdOrder, createdAssociation) = orderService.createOrder(orderSagaState.sagaId, order)
         return if (createdOrder == null || createdAssociation == null) StepResult.FAILURE else StepResult.SUCCESS
     }
@@ -76,7 +75,7 @@ class CreateOrderSagaDefinition(
      */
     private suspend fun orderServiceRejectOrder(): StepResult {
         val affectedEntries = orderService.updateOrderState(orderSagaState.sagaId, EntityStates.CANCELED)
-        return if (affectedEntries == 1) StepResult.SUCCESS else StepResult.RETRY
+        return if (affectedEntries) StepResult.SUCCESS else StepResult.RETRY
     }
 
     private suspend fun consumerServiceVerifyConsumerDetails(): StepResult {
@@ -85,12 +84,12 @@ class CreateOrderSagaDefinition(
     }
 
     private suspend fun kitchenServiceCreateTicket(): StepResult {
-        return if(kitchenServiceProxy.createTicket(orderSagaState.sagaId)) StepResult.SUCCESS else StepResult.FAILURE
+        return if(kitchenServiceProxy.createTicket(orderSagaState.sagaId, orderDetails.customer.id, orderDetails.menuItems)) StepResult.SUCCESS else StepResult.FAILURE
     }
 
     private suspend fun kitchenServiceCancelTicket(): StepResult {
-        val affectedEntries = kitchenServiceProxy.cancelOrder(orderSagaState.sagaId)
-        return if(affectedEntries == 1) StepResult.SUCCESS else StepResult.RETRY
+        val affectedEntries = kitchenServiceProxy.rejectTicket(orderSagaState.sagaId)
+        return if(affectedEntries) StepResult.SUCCESS else StepResult.RETRY
     }
 
     private suspend fun accountingServiceAuthorize(): StepResult {
@@ -99,12 +98,12 @@ class CreateOrderSagaDefinition(
 
     private suspend fun kitchenServiceApproveTicket(): StepResult {
         val affectedEntries = kitchenServiceProxy.approveTicket(orderSagaState.sagaId)
-        return if(affectedEntries == 1) StepResult.SUCCESS else StepResult.RETRY
+        return if(affectedEntries) StepResult.SUCCESS else StepResult.RETRY
     }
 
     private suspend fun orderServiceApproveTicket(): StepResult {
         val affectedEntries = orderService.updateOrderState(orderSagaState.sagaId, EntityStates.APPROVED)
-        return if(affectedEntries == 1) StepResult.SUCCESS else StepResult.RETRY
+        return if(affectedEntries) StepResult.SUCCESS else StepResult.RETRY
     }
 }
 

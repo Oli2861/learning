@@ -15,13 +15,12 @@ object EventSerializer {
             polymorphic(Event::class) {
                 // CreateOrderSagaEvents
                 subclass(VerifyCustomerCommandEvent::class, VerifyCustomerCommandEvent.serializer())
-                subclass(VerifyCustomerReplyEvent::class, VerifyCustomerReplyEvent.serializer())
+                subclass(ReplyEvent::class, ReplyEvent.serializer())
                 subclass(CreateTicketCommandEvent::class, CreateTicketCommandEvent.serializer())
-                subclass(CreateTicketReplyEvent::class, CreateTicketReplyEvent.serializer())
                 subclass(AuthorizationCommandEvent::class, AuthorizationCommandEvent.serializer())
-                subclass(AuthorizationReplyEvent::class, AuthorizationReplyEvent.serializer())
                 subclass(ApproveTicketCommandEvent::class, ApproveTicketCommandEvent.serializer())
-                subclass(ApplyTicketReplyEvent::class, ApplyTicketReplyEvent.serializer())
+                subclass(RejectTicketCommandEvent::class, RejectTicketCommandEvent.serializer())
+                subclass(ErrorEvent::class, ErrorEvent.serializer())
             }
         }
     }

@@ -15,3 +15,7 @@ content-type: application/json
     }
   ]
 }
+
+###
+GET http://localhost:8082/users/1
+accept: application/json

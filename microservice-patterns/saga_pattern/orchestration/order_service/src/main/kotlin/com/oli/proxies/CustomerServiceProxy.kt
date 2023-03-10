@@ -1,21 +1,29 @@
 package com.oli.proxies
 
-import com.oli.event.MessageBroker
-import com.oli.event.VerifyCustomerCommandEvent
+import com.oli.event.*
+import kotlinx.coroutines.runBlocking
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 interface CustomerServiceProxy {
     suspend fun sendVerifyCustomerDetailsCommand(sagaId: Int, customer: Customer): Boolean
 }
 
 class CustomerServiceProxyImpl(
-    private val messageBroker: MessageBroker
+    private val messageBroker: MessageBroker,
+    private val logger: Logger
 ) : CustomerServiceProxy {
-    private val createOrderSagaCommandChannel = System.getenv("CREATE_ORDER_SAGA_COMMAND_CHANNEL") ?: "create_order_saga_command_channel"
-    private val creatOrderSagaReplyChannel = System.getenv("CREATE_ORDER_SAGA_REPLY_CHANNEL") ?: "create_order_saga_reply_channel"
+    private val customerServiceRequestChannel = System.getenv("CUSTOMER_SERVICE_REQUEST_CHANNEL") ?: "customer_service_request_channel"
+    private val createOrderSagaReplyChannel = System.getenv("CREATE_ORDER_SAGA_REPLY_CHANNEL") ?: "create_order_saga_reply_channel"
 
     override suspend fun sendVerifyCustomerDetailsCommand(sagaId: Int, customer: Customer): Boolean {
         val command = VerifyCustomerCommandEvent(sagaId, customer)
-        messageBroker.remoteProcedureCall(createOrderSagaCommandChannel, creatOrderSagaReplyChannel, command)
-        return true
+        val reply = messageBroker.remoteProcedureCall(customerServiceRequestChannel, createOrderSagaReplyChannel, command) ?: return false
+        return evaluateReply(reply, logger)
     }
+}
+
+fun main() = runBlocking {
+    val customer = Customer(1, 28, "Max", "Mustermann", listOf(Address(1, 9123, "Mustertown", "2c")))
+    println(CustomerServiceProxyImpl(RabbitMQBroker, LoggerFactory.getLogger(CustomerServiceProxyImpl::class.java)).sendVerifyCustomerDetailsCommand(1, customer))
 }

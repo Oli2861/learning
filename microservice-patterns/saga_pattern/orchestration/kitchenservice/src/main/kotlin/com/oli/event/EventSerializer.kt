@@ -14,7 +14,9 @@ object EventSerializer {
         serializersModule = SerializersModule {
             polymorphic(Event::class) {
                 // CreateOrderSagaEvents
-                subclass(VerifyCustomerCommandEvent::class, VerifyCustomerCommandEvent.serializer())
+                subclass(CreateTicketCommandEvent::class, CreateTicketCommandEvent.serializer())
+                subclass(ApproveTicketCommandEvent::class, ApproveTicketCommandEvent.serializer())
+                subclass(RejectTicketCommandEvent::class, RejectTicketCommandEvent.serializer())
                 subclass(ErrorEvent::class, ErrorEvent.serializer())
                 subclass(ReplyEvent::class, ReplyEvent.serializer())
             }

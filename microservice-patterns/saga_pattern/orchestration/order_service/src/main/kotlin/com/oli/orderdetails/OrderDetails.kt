@@ -13,7 +13,7 @@ data class OrderDetails(
     val paymentInfo: String,
     val orderingDate: Timestamp,
     val customer: Customer,
-    val orderDetailsItems: List<OrderDetailsItem>
+    val menuItems: List<MenuItem>
 )
 
 /**

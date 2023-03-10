@@ -1,15 +1,13 @@
 package com.oli.orderdetails
 
 import com.oli.order.OrderItem
+import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.dao.id.IntIdTable
 
-data class OrderDetailsItem(
-    val orderDetailsId: Int,
-    val articleNumber: Int,
-    val amount: Int
-) {
+@Serializable
+data class MenuItem(val ticketId: Int = 0, val articleNumber: Int, val amount: Int) {
     fun equalsIgnoreOrderDetailsId(other: Any?): Boolean {
-        if (other !is OrderDetailsItem) return false
+        if (other !is MenuItem) return false
         if (other.articleNumber != articleNumber) return false
         if (other.amount != amount) return false
         return true
@@ -20,10 +18,10 @@ data class OrderDetailsItem(
     }
 }
 
-fun List<OrderDetailsItem>.toOrderItems() = map { it.toOrderItem() }
+fun List<MenuItem>.toOrderItems() = map { it.toOrderItem() }
 
 
-object OrderDetailsItems : IntIdTable() {
+object MenuItems : IntIdTable() {
     val orderDetailsId = reference("orderDetailsId", OrderDetailsTable)
     val articleNumber = integer("articleNumber")
     val amount = integer("amount")

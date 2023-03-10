@@ -25,7 +25,6 @@ private val customerKoinModule = module {
         CustomerService(
             customerDAO = get(),
             addressDAO = get(),
-            messageBroker = get(),
             logger = get()
         )
 

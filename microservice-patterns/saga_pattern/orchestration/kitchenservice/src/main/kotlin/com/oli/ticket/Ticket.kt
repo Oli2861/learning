@@ -4,8 +4,9 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 
 
 data class Ticket(
-    val id: Int,
+    val id: Int = 0,
     val customerId: Int,
+    val sagaId: Int,
     val state: Int,
     val items: List<MenuItem>
 ) {
@@ -27,4 +28,5 @@ data class Ticket(
 object Tickets : IntIdTable() {
     val customerId = integer("customerId")
     var state = integer("state")
+    var sagaId = integer("sagaId")
 }

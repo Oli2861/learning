@@ -3,7 +3,7 @@ package com.oli.persistence
 import com.oli.order.OrderItems
 import com.oli.order.OrderSagaAssociations
 import com.oli.order.Orders
-import com.oli.orderdetails.OrderDetailsItems
+import com.oli.orderdetails.MenuItems
 import com.oli.orderdetails.OrderDetailsTable
 import com.oli.saga.CreateOrderSagaStates
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +24,7 @@ object DatabaseFactory {
             SchemaUtils.create(OrderItems)
             SchemaUtils.create(Orders)
             SchemaUtils.create(OrderDetailsTable)
-            SchemaUtils.create(OrderDetailsItems)
+            SchemaUtils.create(MenuItems)
             SchemaUtils.create(CreateOrderSagaStates)
             SchemaUtils.create(OrderSagaAssociations)
         }

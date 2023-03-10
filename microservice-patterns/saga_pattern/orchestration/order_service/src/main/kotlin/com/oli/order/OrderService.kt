@@ -1,8 +1,5 @@
 package com.oli.order
 
-import com.oli.event.CreateTicketReplyEvent
-import com.oli.event.Event
-import com.oli.event.VerifyCustomerReplyEvent
 import com.oli.utility.stringIdToInt
 import org.slf4j.Logger
 
@@ -25,23 +22,8 @@ class OrderService(
         return orderRepository.deleteOrder(orderId)
     }
 
-    suspend fun updateOrderState(sagaId: Int, orderState: Int): Int {
-        return orderRepository.updateOrderState(sagaId, orderState)
-    }
-
-    fun handleEvent(event: Event) {
-        println("KLASHDALSKDHLASKDJHASLDHASODLIKASHDOIASDH")
-        println(logger.isDebugEnabled)
-        logger.debug("Received event $event")
-        when(event){
-            is VerifyCustomerReplyEvent -> handleVerifyCustomerReplyEvent(event)
-            is CreateTicketReplyEvent -> {}
-            else -> logger.debug("Received unhandled event $event")
-        }
-    }
-
-    private fun handleVerifyCustomerReplyEvent(event: VerifyCustomerReplyEvent) {
-        logger.debug("Received $event")
+    suspend fun updateOrderState(sagaId: Int, orderState: Int): Boolean {
+        return orderRepository.updateOrderState(sagaId, orderState) >= 1
     }
 
 }

@@ -12,18 +12,7 @@ data class VerifyCustomerCommandEvent(
 ) : CreateOrderSagaEvent
 
 @Serializable
-data class VerifyCustomerReplyEvent(
+data class ReplyEvent(
     override val sagaId: Int,
-    val customer: Customer,
-    val result: Boolean?
-) : CreateOrderSagaEvent {
-    constructor(
-        verifyCustomerCommandEvent: VerifyCustomerCommandEvent,
-        result: Boolean?
-    ) : this(
-        sagaId = verifyCustomerCommandEvent.sagaId,
-        customer = verifyCustomerCommandEvent.customer,
-        result = result
-    )
-}
-
+    val result: Boolean
+): CreateOrderSagaEvent
