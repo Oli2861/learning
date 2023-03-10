@@ -1,7 +1,9 @@
 package com.oli.persistence
 
+import com.oli.creditcardinfo.CreditCardInfos
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
@@ -14,6 +16,7 @@ object DatabaseFactory {
 
         transaction(database) {
             addLogger(StdOutSqlLogger)
+            SchemaUtils.create(CreditCardInfos)
         }
     }
 
@@ -23,7 +26,7 @@ object DatabaseFactory {
         val user = System.getenv("POSTGRES_USER")
         val password = System.getenv("POSTGRES_PASSWORD")
         val databaseName = System.getenv("POSTGRES_DB")
-
+        println("jdbc:postgresql://$host:$port/$databaseName?user=$user&password=$password")
         return Database.connect(
             url = "jdbc:postgresql://$host:$port/$databaseName?user=$user&password=$password",
             driver = "org.postgresql.Driver"

@@ -1,29 +1,23 @@
 package com.oli.event
 
-import com.oli.payment.PaymentService
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import org.apache.commons.text.StringEscapeUtils
+import com.oli.accounting.AccountingService
+import kotlinx.coroutines.CoroutineScope
 import org.koin.java.KoinJavaComponent.inject
-import org.slf4j.Logger
 
 object MessageReceiver {
-    private val logger by inject<Logger>(Logger::class.java)
-    private val paymentService by inject<PaymentService>(PaymentService::class.java)
+    private val accountingService by inject<AccountingService>(AccountingService::class.java)
+    private val customerServiceRequestChannelName =
+        System.getenv("ACCOUNTING_SERVICE_REQUEST_CHANNEL") ?: "accounting_service_request_channel"
 
-    fun init() {
-        RabbitMQBroker.listenToQueue(
-            queueName = "accounting_service_request_channel",
-            onReceive = { message ->
-                try {
-                    val commandEvent = Json.decodeFromString<AuthorizationCommandEvent>(message)
-                    paymentService.authorizeCreditCard(commandEvent)
-                } catch (e: IllegalArgumentException) {
-                    logger.debug("Could not decode the received event to a instance of CreditCardInfo. Received message: ${StringEscapeUtils.escapeJava(message)}")
-                }
+    fun init(scope: CoroutineScope) {
+        RabbitMQBroker.listenForRPC(
+            scope = scope,
+            queueName = customerServiceRequestChannelName,
+            onReceive = { correlationId: String, event: Event ->
+                accountingService.handleEvent(correlationId, event)
             },
             onCancel = {
-                // TODO
+
             }
         )
     }

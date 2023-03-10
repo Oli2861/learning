@@ -1,22 +1,15 @@
 package com.oli.event
 
+import kotlinx.serialization.Serializable
+
 interface Event {
-    val correlationId: Int
 }
 
-interface SagaEvent: Event{
+@Serializable
+data class ErrorEvent(
+    val message: String
+) : Event
+
+interface SagaEvent : Event {
     val sagaId: Int
 }
-
-data class AuthorizationCommandEvent(
-    override val correlationId: Int,
-    override val sagaId: Int,
-    val userId: Int,
-    val paymentInfo: String
-) : SagaEvent
-
-data class AuthorizationReplyEvent(
-    override val correlationId: Int,
-    override val sagaId: Int,
-    val result: Boolean
-) : SagaEvent

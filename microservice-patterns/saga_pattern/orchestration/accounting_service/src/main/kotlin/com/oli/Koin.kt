@@ -1,8 +1,8 @@
 package com.oli
 
+import com.oli.accounting.AccountingService
 import com.oli.event.MessageBroker
 import com.oli.event.RabbitMQBroker
-import com.oli.payment.PaymentService
 import io.ktor.server.application.*
 import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
@@ -26,10 +26,5 @@ private val appKoinModule = module {
         RabbitMQBroker
     }
 
-    single<PaymentService> {
-        PaymentService(
-            messageBroker = get()
-        )
-    }
 
 }
