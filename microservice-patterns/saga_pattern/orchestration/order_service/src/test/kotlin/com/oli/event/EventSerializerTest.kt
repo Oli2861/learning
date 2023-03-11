@@ -37,31 +37,31 @@ class EventSerializerTest {
 
     @Test
     fun serializeAuthorizationReplyEventTest(){
-        val event: Event = AuthorizationReplyEvent(1, false)
+        val event: Event = ReplyEvent(1, false)
         val actual = EventSerializer.serialize(event)
 
-        val expected = "{\"type\":\"com.oli.event.AuthorizationReplyEvent\",\"sagaId\":1,\"result\":false}"
+        val expected = "{\"type\":\"com.oli.event.ReplyEvent\",\"sagaId\":1,\"result\":false}"
         assertEquals(expected, actual)
     }
 
     @Test
     fun deserializeAuthorizationReplyEventTest() {
-        val actual = EventSerializer.deserialize("{\"type\":\"com.oli.event.AuthorizationReplyEvent\",\"sagaId\":1,\"result\":false}")
+        val actual = EventSerializer.deserialize("{\"type\":\"com.oli.event.ReplyEvent\",\"sagaId\":1,\"result\":false}")
 
-        val expected: Event = AuthorizationReplyEvent(1, false)
-        assertTrue(actual is AuthorizationReplyEvent)
+        val expected: Event = ReplyEvent(1, false)
+        assertTrue(actual is ReplyEvent)
         assertEquals(expected, actual)
     }
 
     @Test
     fun serializeAndDeserializeReplyCommandEvent(){
-        val event: Event = AuthorizationReplyEvent(1, false)
+        val event: Event = ReplyEvent(1, false)
         val serialized = EventSerializer.serialize(event)
         val deserialized = EventSerializer.deserialize(serialized)
 
         assertTrue(deserialized is SagaEvent)
         assertTrue(deserialized is CreateOrderSagaEvent)
-        assertTrue(deserialized is AuthorizationReplyEvent)
+        assertTrue(deserialized is ReplyEvent)
         assertEquals(event, deserialized)
     }
 }
