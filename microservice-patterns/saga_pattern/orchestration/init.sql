@@ -12,4 +12,4 @@ GRANT ALL PRIVILEGES ON DATABASE kitchendb to kitchenservice;
 
 CREATE user accountingservice;
 CREATE DATABASE accountingdb;
-GRANT ALL PRIVILEEGES ON DATABASE accountingdb to accountingservice;
+GRANT ALL PRIVILEGES ON DATABASE accountingdb to accountingservice;
