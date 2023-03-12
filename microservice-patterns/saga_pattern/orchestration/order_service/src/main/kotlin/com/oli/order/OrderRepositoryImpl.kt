@@ -20,6 +20,11 @@ class OrderRepositoryImpl(
         return orderDAO.readOrder(orderId)
     }
 
+    override suspend fun readOrderForSagaId(sagaId: Int): Order? {
+        val orderId = orderSagaAssociationDAO.readUsingSagaId(sagaId)?.orderId ?: return null
+        return orderDAO.readOrder(orderId)
+    }
+
     override suspend fun deleteOrder(orderId: Int): Int {
         orderSagaAssociationDAO.deleteAllForOrder(orderId)
         return orderDAO.deleteOrder(orderId)

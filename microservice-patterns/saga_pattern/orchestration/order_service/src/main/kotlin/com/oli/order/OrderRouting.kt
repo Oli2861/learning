@@ -1,10 +1,5 @@
 package com.oli.order
 
-import com.oli.event.RabbitMQBroker
-import com.oli.orderdetails.OrderDetails
-import com.oli.proxies.Address
-import com.oli.proxies.Customer
-import com.oli.proxies.CustomerServiceProxyImpl
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -22,16 +17,13 @@ fun Route.orderRouting() {
     route(OrderRoutingConstants.ORDER_ROUTE_PATH) {
 
         post {
-            val orderDetails: OrderDetails = call.receive()
-            TODO("Not yet implemented")
-            /*
-            // val createdOrder = orderService.createOrder(orderDetails.userId, orderDetails.orderingDate)
-            return@post if (createdOrder == null) {
+            val order = call.receive<Order>()
+            val result = orderService.createOrderSaga(order)
+            return@post if (result == null || (!result.second)) {
                 call.respondText("Unable to create the order", status = HttpStatusCode.Conflict)
             } else {
-                call.respondText("Created order with orderID ${createdOrder.id}", status = HttpStatusCode.Created)
+                call.respondText("Created order with orderID ${result.first}", status = HttpStatusCode.Created)
             }
-             */
         }
 
         delete("{id}") {

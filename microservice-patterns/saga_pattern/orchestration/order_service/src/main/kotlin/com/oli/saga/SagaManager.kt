@@ -1,55 +1,46 @@
 package com.oli.saga
 
-import com.oli.orderdetails.OrderDetails
-import com.oli.orderdetails.OrderDetailsDAO
+import com.oli.order.Order
+import org.slf4j.Logger
 
 
 class CreateOrderSagaManager(
-    private val sagaId: Int,
     private val orderSagaStateDAO: CreateOrderSagaStateDAO,
-    private val orderDetailsDAO: OrderDetailsDAO,
-    private val sagaDefinition: CreateOrderSagaDefinition
+    val logger: Logger
 ) {
-    private lateinit var sagaState: SagaState
-    private lateinit var orderDetails: OrderDetails
 
-    /**
-     * Load saga data from the database.
-     */
-    private suspend fun setup(): Boolean {
-        sagaState = orderSagaStateDAO.read(sagaId) ?: return false
-        orderDetails = orderDetailsDAO.read(sagaId) ?: return false
-        return true
+    suspend fun createAndExecuteSaga(order: Order): Pair<Boolean, Int>? {
+        val sagaState = orderSagaStateDAO.create(CreateOrderSagaState(0, 0, false, null))
+        return if (sagaState == null) {
+            logger.debug("Error while creating saga definition: The created saga state is null.")
+            null
+        } else {
+            val sagaDefinition = CreateOrderSagaDefinition(sagaState, order)
+            executeSaga(sagaDefinition)
+        }
     }
 
-    /**
-     * Execute the next step of the saga.
-     */
-    suspend fun executeNextStep() {
-        val result = sagaDefinition.step()
-        when (result) {
-            SagaStepResult.UNFINISHED -> {
-
-            }
-
+    private suspend fun executeSaga(sagaDefinition: CreateOrderSagaDefinition): Pair<Boolean, Int> {
+        var result: SagaStepResult = SagaStepResult.UNFINISHED
+        while (result == SagaStepResult.UNFINISHED) {
+            result = sagaDefinition.step()
+        }
+        return when (result) {
             SagaStepResult.ROLLED_BACK -> {
-
+                logger.debug("${sagaDefinition.sagaState.sagaId} rolled back.")
+                Pair(false, sagaDefinition.sagaState.sagaId)
             }
 
             SagaStepResult.FINISHED -> {
+                logger.debug("${sagaDefinition.sagaState.sagaId} completed successfully.")
+                Pair(true, sagaDefinition.sagaState.sagaId)
+            }
 
+            else -> {
+                logger.debug("${sagaDefinition.sagaState.sagaId} unexpected SagaStepResult.")
+                Pair(false, sagaDefinition.sagaState.sagaId)
             }
         }
-
-    }
-
-    /**
-     * Persist the state of the saga until execution can continue.
-     * @return whether the execution of the operations lead to the expected result.
-     */
-    private suspend fun persist(): Boolean {
-        val affectedRows = orderSagaStateDAO.update(sagaState)
-        return affectedRows == 1
     }
 
 }

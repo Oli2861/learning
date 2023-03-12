@@ -5,6 +5,7 @@ import com.oli.event.RabbitMQBroker
 import com.oli.persistence.CreateOrderSagaStateDAOImpl
 import com.oli.persistence.OrderDAOImpl
 import com.oli.persistence.OrderSagaAssociationDAOImpl
+import com.oli.proxies.OrderServiceProxy
 import com.oli.saga.CreateOrderSagaStateDAO
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
@@ -13,7 +14,6 @@ import org.koin.ktor.plugin.koin
 
 fun Application.orderModule() {
     koin {
-        modules(orderKoinModule)
         configureOrderRouting()
     }
 }
@@ -52,8 +52,10 @@ private val orderKoinModule = module {
     single<OrderService> {
         OrderService(
             orderRepository = get(),
-            logger = get(),
+            createOrderSagaManager = get(),
+            logger = get()
         )
     }
+    single<OrderServiceProxy> { OrderService(orderRepository = get(), logger = get(), createOrderSagaManager = get()) }
 
 }

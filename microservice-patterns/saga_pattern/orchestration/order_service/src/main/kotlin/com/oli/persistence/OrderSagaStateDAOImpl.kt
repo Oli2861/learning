@@ -10,7 +10,7 @@ class CreateOrderSagaStateDAOImpl : CreateOrderSagaStateDAO {
         sagaId = resultRow[CreateOrderSagaStates.id].value,
         currentStep = resultRow[CreateOrderSagaStates.currentStep],
         rollingBack = resultRow[CreateOrderSagaStates.rollingBack],
-        orderDetailsId = resultRow[CreateOrderSagaStates.orderDetailsId]?.value
+        orderId = resultRow[CreateOrderSagaStates.orderId]?.value
     )
 
     override suspend fun create(
@@ -20,7 +20,7 @@ class CreateOrderSagaStateDAOImpl : CreateOrderSagaStateDAO {
             val id = CreateOrderSagaStates.insertAndGetId {
                 it[currentStep] = createOrderSagaState.currentStep
                 it[rollingBack] = createOrderSagaState.rollingBack
-                it[orderDetailsId] = createOrderSagaState.orderDetailsId
+                it[orderId] = createOrderSagaState.orderId
 
             }.value
             return@dbQuery readQuery(id)

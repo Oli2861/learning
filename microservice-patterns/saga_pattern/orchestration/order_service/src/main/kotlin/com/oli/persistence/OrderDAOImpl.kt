@@ -1,6 +1,7 @@
 package com.oli.persistence
 
 import com.oli.order.*
+import com.oli.proxies.Address
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.sql.Timestamp
@@ -9,7 +10,13 @@ class OrderDAOImpl : OrderDAO {
 
     private fun resultRowToOrder(resultRow: ResultRow, items: List<OrderItem>) = Order(
         id = resultRow[Orders.id].value,
-        userId = resultRow[Orders.userId],
+        customerId = resultRow[Orders.customerId],
+        address = Address(
+            postCode = resultRow[Orders.postCode],
+            city = resultRow[Orders.city],
+            houseNumber = resultRow[Orders.houseNumber],
+        ),
+        paymentInfo = resultRow[Orders.paymentInfo],
         timestamp = Timestamp.from(resultRow[Orders.date]),
         orderState = resultRow[Orders.state],
         items = items
@@ -20,7 +27,11 @@ class OrderDAOImpl : OrderDAO {
 
     override suspend fun createOrder(order: Order): Order? = DatabaseFactory.dbQuery {
         val createOrderId = Orders.insertAndGetId {
-            it[userId] = order.userId
+            it[customerId] = order.customerId
+            it[postCode] = order.address.postCode
+            it[city] = order.address.city
+            it[houseNumber] = order.address.houseNumber
+            it[paymentInfo] = order.paymentInfo
             it[date] = order.timestamp.toInstant()
             it[state] = order.orderState
         }.value

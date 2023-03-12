@@ -1,7 +1,5 @@
 package com.oli.order
 
-import com.oli.orderdetails.OrderDetails
-import com.oli.orderdetails.OrderDetailsDAO
 import com.oli.persistence.*
 import com.oli.proxies.Address
 import com.oli.proxies.Customer
@@ -20,7 +18,6 @@ import kotlin.test.assertTrue
 class OrderRepositoryTest {
     companion object {
         private lateinit var orderRepository: OrderRepository
-        private lateinit var orderDetailsDAO: OrderDetailsDAO
         private lateinit var sagaStateDAO: CreateOrderSagaStateDAO
         private lateinit var orderSagaAssociationDAO: OrderSagaAssociationDAO
         private lateinit var orderDAO: OrderDAO
@@ -29,7 +26,6 @@ class OrderRepositoryTest {
         @JvmStatic
         fun init() {
             DatabaseFactory.init(true)
-            orderDetailsDAO = OrderDetailsDAOImpl()
             sagaStateDAO = CreateOrderSagaStateDAOImpl()
             orderSagaAssociationDAO = OrderSagaAssociationDAOImpl()
             orderDAO = OrderDAOImpl()
@@ -39,10 +35,8 @@ class OrderRepositoryTest {
 
     @Test
     fun testCreateOrder() = runBlocking {
-        val customer = Customer(0, 23, "Max", "Mustermann", listOf(Address(0, 12345, "Mustertown", "5e")))
-        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", Timestamp(System.currentTimeMillis()), customer, listOf()))
-        val saga = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails!!.id))
-        val order = Order(1, 1, Timestamp(System.currentTimeMillis()), EntityStates.PENDING, listOf(OrderItem(1, 1)))
+        val order = Order(customerId = 1, address = Address(12345, "Mustertown", "5e"), paymentInfo = "test", items= listOf(OrderItem(1, 1)))
+        val saga = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, null))
         val (createdOrder: Order?, createdAssociation: OrderSagaAssociation?) = orderRepository.createOrder(saga!!.sagaId, order)
 
         assertNotNull(createdOrder)
@@ -55,26 +49,22 @@ class OrderRepositoryTest {
 
     @Test
     fun testReadOrder() = runBlocking {
-        val customer = Customer(0, 23, "Max", "Mustermann", listOf(Address(0, 12345, "Mustertown", "5e")))
-        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", Timestamp(System.currentTimeMillis()), customer, listOf()))
-        val saga = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails!!.id))
-        val order = Order(1, 1, Timestamp(System.currentTimeMillis()), EntityStates.PENDING, listOf(OrderItem(1, 1)))
-        val created = orderRepository.createOrder(saga!!.sagaId, order).first
-        val read = orderRepository.readOrder(created!!.id)
+        val order = Order(customerId = 1, address = Address(12345, "Mustertown", "5e"), paymentInfo = "test", items= listOf(OrderItem(1, 1)))
+        val saga = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, null))
+        val (createdOrder: Order?, createdAssociation: OrderSagaAssociation?) = orderRepository.createOrder(saga!!.sagaId, order)
+        val read = orderRepository.readOrder(createdOrder!!.id)
 
         assertTrue(order.equalsIgnoreId(read))
-        assertTrue(created.equalsIgnoreId(read))
+        assertTrue(createdOrder.equalsIgnoreId(read))
     }
 
     @Test
     fun testDeleteOrder() = runBlocking {
-        val customer = Customer(0, 23, "Max", "Mustermann", listOf(Address(0, 12345, "Mustertown", "5e")))
-        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", Timestamp(System.currentTimeMillis()), customer, listOf()))
-        val saga = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails!!.id))
-        val order = Order(1, 1, Timestamp(System.currentTimeMillis()), EntityStates.PENDING, listOf(OrderItem(1, 1)))
-        val created = orderRepository.createOrder(saga!!.sagaId, order).first!!
+        val order = Order(customerId = 1, address = Address(12345, "Mustertown", "5e"), paymentInfo = "test", items= listOf(OrderItem(1, 1)))
+        val saga = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, null))
+        val (created: Order?, createdAssociation: OrderSagaAssociation?) = orderRepository.createOrder(saga!!.sagaId, order)
 
-        val affectedRows = orderRepository.deleteOrder(created.id)
+        val affectedRows = orderRepository.deleteOrder(created!!.id)
         assertEquals(1, affectedRows)
 
         val readAttempt = orderRepository.readOrder(created.id)
@@ -87,18 +77,16 @@ class OrderRepositoryTest {
 
     @Test
     fun testUpdateOrderState() = runBlocking {
-        val customer = Customer(0, 23, "Max", "Mustermann", listOf(Address(0, 12345, "Mustertown", "5e")))
-        val orderDetails = orderDetailsDAO.create(OrderDetails(0, "", Timestamp(System.currentTimeMillis()), customer, listOf()))
-        val saga = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, orderDetails!!.id))
-        val order = Order(1, 1, Timestamp(System.currentTimeMillis()), EntityStates.PENDING, listOf(OrderItem(1, 1)))
-        val created = orderRepository.createOrder(saga!!.sagaId, order).first!!
+        val originalorder = Order(customerId = 1, address = Address(12345, "Mustertown", "5e"), paymentInfo = "test", items= listOf(OrderItem(1, 1)))
+        val saga = sagaStateDAO.create(CreateOrderSagaState(0, 0, false, null))
+        val (created: Order?, createdAssociation: OrderSagaAssociation?) = orderRepository.createOrder(saga!!.sagaId, originalorder)
 
         val updatedRows = orderRepository.updateOrderState(saga.sagaId, EntityStates.CANCELED)
         assertEquals(1, updatedRows)
 
-        val expected = Order(created.id, order.userId, order.timestamp, EntityStates.CANCELED, order.items)
-        val read = orderRepository.readOrder(created.id)
-        assertTrue(expected.equalsIgnoreId(read))
+        val order = Order(customerId = 1, timestamp = originalorder.timestamp, address = Address(12345, "Mustertown", "5e"), orderState = EntityStates.CANCELED, paymentInfo = "test", items= listOf(OrderItem(1, 1)))
+        val read = orderRepository.readOrder(created!!.id)
+        assertTrue(order.equalsIgnoreId(read))
     }
 
 }

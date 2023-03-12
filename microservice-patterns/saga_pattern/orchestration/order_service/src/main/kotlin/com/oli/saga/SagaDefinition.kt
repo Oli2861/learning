@@ -1,15 +1,16 @@
 package com.oli.saga
 
+import org.koin.java.KoinJavaComponent.inject
 import org.slf4j.Logger
 
 enum class SagaStepResult { UNFINISHED, FINISHED, ROLLED_BACK }
 
 abstract class SagaDefinition(
-    private val sagaState: SagaState,
-    private val logger: Logger,
+    val sagaState: SagaState,
     private val sagaName: String
 ) {
     protected abstract val saga: Saga
+    private val logger: Logger by inject(Logger::class.java)
 
     /**
      * Proceed in the saga by one step.

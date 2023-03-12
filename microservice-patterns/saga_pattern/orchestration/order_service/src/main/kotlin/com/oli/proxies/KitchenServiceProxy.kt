@@ -1,13 +1,13 @@
 package com.oli.proxies
 
 import com.oli.event.*
-import com.oli.orderdetails.MenuItem
+import com.oli.order.OrderItem
 import kotlinx.coroutines.runBlocking
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 interface KitchenServiceProxy {
-    suspend fun createTicket(sagaId: Int, customerId: Int, menuItems: List<MenuItem>): Boolean
+    suspend fun createTicket(sagaId: Int, customerId: Int, menuItems: List<OrderItem>): Boolean
     suspend fun rejectTicket(sagaId: Int): Boolean
     suspend fun approveTicket(sagaId: Int): Boolean
 }
@@ -22,7 +22,7 @@ class KitchenServiceProxyImpl(
     private val createOrderSagaReplyChannel =
         System.getenv("CREATE_ORDER_SAGA_REPLY_CHANNEL") ?: "create_order_saga_reply_channel"
 
-    override suspend fun createTicket(sagaId: Int, customerId: Int, menuItems: List<MenuItem>): Boolean {
+    override suspend fun createTicket(sagaId: Int, customerId: Int, menuItems: List<OrderItem>): Boolean {
         val event = CreateTicketCommandEvent(sagaId, customerId, menuItems)
         logger.debug(event.toString())
         val reply = messageBroker.remoteProcedureCall(customerServiceRequestChannel, createOrderSagaReplyChannel, event)
@@ -52,7 +52,7 @@ class KitchenServiceProxyImpl(
 fun main() = runBlocking {
     val proxy = KitchenServiceProxyImpl(RabbitMQBroker, LoggerFactory.getLogger(KitchenServiceProxyImpl::class.java))
     val reply = if (false) {
-        proxy.createTicket(1, 1, listOf(MenuItem(1, 1, 2), MenuItem(1, 3, 4)))
+        proxy.createTicket(1, 1, listOf(OrderItem(1, 2), OrderItem(3, 4)))
     } else if (true) {
         proxy.rejectTicket(1)
     } else {

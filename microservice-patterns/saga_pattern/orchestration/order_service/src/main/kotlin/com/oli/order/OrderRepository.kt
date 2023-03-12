@@ -18,6 +18,8 @@ interface OrderRepository {
      */
     suspend fun readOrder(orderId: Int): Order?
 
+    suspend fun readOrderForSagaId(sagaId: Int): Order?
+
     /**
      * Delete an order.
      * @param orderId ID of the order to be deleted.

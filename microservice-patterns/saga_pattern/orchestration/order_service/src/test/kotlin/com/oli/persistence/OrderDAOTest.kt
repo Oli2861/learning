@@ -2,6 +2,7 @@ package com.oli.persistence
 
 import com.oli.order.Order
 import com.oli.order.OrderItem
+import com.oli.proxies.Address
 import com.oli.saga.EntityStates
 import kotlinx.coroutines.runBlocking
 import org.junit.BeforeClass
@@ -26,8 +27,9 @@ class OrderDAOTest {
     fun testInsert() = runBlocking {
         val order = Order(
             id = 0,
-            userId = 1,
-            timestamp = Timestamp(System.currentTimeMillis()),
+            customerId = 1,
+            address = Address(1234, "askdj", "5c"),
+            paymentInfo = "jahsd",
             orderState = 1,
             items = listOf(OrderItem(0, 1), OrderItem(2, 5), OrderItem(4, 10))
         )
@@ -71,10 +73,11 @@ class OrderDAOTest {
     private suspend fun insertSampleOrder(): Order {
         val order = Order(
             id = 0,
-            userId = 1,
-            timestamp = Timestamp(System.currentTimeMillis()),
-            orderState = EntityStates.PENDING,
-            items = listOf(OrderItem(0, 1), OrderItem(1, 2), OrderItem(5, 5))
+            customerId = 1,
+            address = Address(1234, "askdj", "5c"),
+            paymentInfo = "jahsd",
+            orderState = 1,
+            items = listOf(OrderItem(0, 1), OrderItem(2, 5), OrderItem(4, 10))
         )
         return dao.createOrder(order)!!
     }

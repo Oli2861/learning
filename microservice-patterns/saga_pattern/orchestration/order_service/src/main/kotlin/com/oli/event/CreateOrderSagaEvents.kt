@@ -1,7 +1,7 @@
 package com.oli.event
 
-import com.oli.orderdetails.MenuItem
-import com.oli.proxies.Customer
+import com.oli.order.OrderItem
+import com.oli.proxies.Address
 import kotlinx.serialization.Serializable
 
 interface CreateOrderSagaEvent: SagaEvent
@@ -15,14 +15,15 @@ data class ReplyEvent(
 @Serializable
 data class VerifyCustomerCommandEvent(
     override val sagaId: Int,
-    val customer: Customer
+    val customerId: Int,
+    val address: Address
 ) : CreateOrderSagaEvent
 
 @Serializable
 data class CreateTicketCommandEvent(
     override val sagaId: Int,
     val customerId: Int,
-    val menuItems: List<MenuItem>
+    val menuItems: List<OrderItem>
 ) : CreateOrderSagaEvent
 
 @Serializable
