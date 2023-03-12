@@ -23,16 +23,14 @@ class CustomerService(
     }
 
     /**
-     * Verify a customer by comparing the provided object with the one stored in the database.
-     * @param customer The customer object to be compared with the stored one.
-     * @return True if the provided object corresponds to the stored entity, false if not and null if there is no entity with the provided ID.
+     * Verify that a customer exists and that the provided address is valid.
+     * @param customerId The id of the customer to be checked.
+     * @param address The address to be verified.
+     * @return True if the provided address is an address that matches any of the addresses of the customer.
      */
-    suspend fun verify(customer: Customer): Boolean? {
-        val storedCustomer: Customer = read(customer.id) ?: return null
-        val providedAddressKnown = customer.addresses.all { provided ->
-            storedCustomer.addresses.any { stored -> stored.equalsIgnoreId(provided) }
-        }
-        return storedCustomer.equalIgnoreIdAndAddresses(customer) && providedAddressKnown
+    suspend fun verify(customerId: Int, address: Address): Boolean? {
+        val storedCustomer: Customer = read(customerId) ?: return null
+        return storedCustomer.addresses.any { it.equalsIgnoreId(address) }
     }
 
     /**
@@ -80,7 +78,7 @@ class CustomerService(
     }
 
     private suspend fun handleCustomerVerificationEvent(correlationId: String, event: VerifyCustomerCommandEvent): ReplyEvent {
-        val result = verify(event.customer) ?: false
+        val result = verify(event.customerId, event.address) ?: false
         val response = ReplyEvent(event.sagaId, result)
         logger.debug("CorrelationId: $correlationId. Customer verification for completed.")
         return response

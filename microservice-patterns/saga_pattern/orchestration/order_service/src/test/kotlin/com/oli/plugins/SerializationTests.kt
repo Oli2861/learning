@@ -10,7 +10,6 @@ import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Test
 import java.sql.Timestamp
 import kotlin.test.assertEquals
-/*
 class SerializationTests {
     // Test serialization
     @Test
@@ -47,4 +46,4 @@ class SerializationTests {
         assertEquals(expected, actual)
     }
 
-}*/
+}

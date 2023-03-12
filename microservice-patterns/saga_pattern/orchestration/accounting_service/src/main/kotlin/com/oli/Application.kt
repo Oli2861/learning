@@ -17,7 +17,7 @@ fun main() {
 }
 
 fun Application.module(isTest: Boolean = false) {
-    DatabaseFactory.init(false)
+    DatabaseFactory.init(isTest)
     configureKoin()
 
     configureSerialization()

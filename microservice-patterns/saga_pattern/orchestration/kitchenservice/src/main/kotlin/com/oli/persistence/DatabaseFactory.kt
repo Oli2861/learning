@@ -1,6 +1,6 @@
 package com.oli.persistence
 
-import com.oli.ticket.MenuItems
+import com.oli.ticket.OrderItems
 import com.oli.ticket.Tickets
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.*
@@ -15,7 +15,7 @@ object DatabaseFactory {
         transaction(database) {
             addLogger(StdOutSqlLogger)
             SchemaUtils.create(Tickets)
-            SchemaUtils.create(MenuItems)
+            SchemaUtils.create(OrderItems)
         }
     }
 

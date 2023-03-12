@@ -34,7 +34,7 @@ class CreateOrderSagaDefinition(
             compensatingTransaction = ::orderServiceRejectOrder
         }
         step {
-            description = "Step 2: Verify the consumer details by calling the consumer service."
+            description = "Step 2: Verify the customer details by calling the customer service."
             transaction = ::consumerServiceVerifyConsumerDetails
         }
         step {

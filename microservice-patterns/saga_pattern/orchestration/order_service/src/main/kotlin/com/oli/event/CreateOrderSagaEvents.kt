@@ -23,7 +23,7 @@ data class VerifyCustomerCommandEvent(
 data class CreateTicketCommandEvent(
     override val sagaId: Int,
     val customerId: Int,
-    val menuItems: List<OrderItem>
+    val orderItems: List<OrderItem>
 ) : CreateOrderSagaEvent
 
 @Serializable

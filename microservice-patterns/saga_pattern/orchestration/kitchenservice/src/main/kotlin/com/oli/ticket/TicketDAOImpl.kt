@@ -5,7 +5,7 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
 class TicketDAOImpl : TicketDAO {
-    private fun resultRowToTicket(resultRow: ResultRow, items: List<MenuItem>): Ticket {
+    private fun resultRowToTicket(resultRow: ResultRow, items: List<OrderItem>): Ticket {
         return Ticket(
             id = resultRow[Tickets.id].value,
             customerId = resultRow[Tickets.customerId],
@@ -15,10 +15,10 @@ class TicketDAOImpl : TicketDAO {
         )
     }
 
-    private fun resultRowToMenuItem(resultRow: ResultRow): MenuItem = MenuItem(
-        ticketId = resultRow[MenuItems.ticketId].value,
-        articleNumber = resultRow[MenuItems.itemId],
-        amount = resultRow[MenuItems.amount]
+    private fun resultRowToMenuItem(resultRow: ResultRow): OrderItem = OrderItem(
+        ticketId = resultRow[OrderItems.ticketId].value,
+        articleNumber = resultRow[OrderItems.itemId],
+        amount = resultRow[OrderItems.amount]
     )
 
     override suspend fun create(ticket: Ticket): Ticket? = DatabaseFactory.dbQuery {
@@ -29,7 +29,7 @@ class TicketDAOImpl : TicketDAO {
                 it[sagaId] = ticket.sagaId
             }
         ticket.items.map { menuItem ->
-            MenuItems.insert {
+            OrderItems.insert {
                 it[ticketId] = createdTicketId.value
                 it[itemId] = menuItem.articleNumber
                 it[amount] = menuItem.amount
@@ -48,7 +48,7 @@ class TicketDAOImpl : TicketDAO {
 
     // Without transaction to be used by the create function and the read function
     private fun readQuery(ticketId: Int): Ticket? {
-        val items: List<MenuItem> = MenuItems.select(MenuItems.ticketId eq ticketId).toList().map(::resultRowToMenuItem)
+        val items: List<OrderItem> = OrderItems.select(OrderItems.ticketId eq ticketId).toList().map(::resultRowToMenuItem)
         return Tickets.select(Tickets.id eq ticketId).map { resultRowToTicket(it, items) }.firstOrNull()
     }
 }

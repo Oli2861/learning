@@ -1,6 +1,6 @@
 package com.oli.event
 
-import com.oli.customer.Customer
+import com.oli.address.Address
 import kotlinx.serialization.Serializable
 
 interface CreateOrderSagaEvent : SagaEvent
@@ -8,7 +8,8 @@ interface CreateOrderSagaEvent : SagaEvent
 @Serializable
 data class VerifyCustomerCommandEvent(
     override val sagaId: Int,
-    val customer: Customer
+    val customerId: Int,
+    val address: Address
 ) : CreateOrderSagaEvent
 
 @Serializable

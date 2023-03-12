@@ -172,10 +172,10 @@ class ApplicationTests {
         val id = created.bodyAsText().toInt()
 
         // Test whether the created customer corresponds with the provided one
-        val customer1 = Json.encodeToString(Customer(id, customer.age, customer.firstName, customer.lastName, customer.addresses))
-        val comparisonReponse = client.get("/users/verify"){
+        val address = Json.encodeToString(customer.addresses.first())
+        val comparisonReponse = client.get("/users/verify/$id"){
             contentType(ContentType.Application.Json)
-            setBody(customer1)
+            setBody(address)
         }
 
         assertEquals(HttpStatusCode.OK, comparisonReponse.status)
@@ -200,15 +200,11 @@ class ApplicationTests {
         val id = created.bodyAsText().toInt()
 
         // Test whether the created customer corresponds with the provided one
-        val customer1 = Json.encodeToString(
-            Customer(id = id, age = 22, firstName = "Max", lastName = "Mustermann", addresses = listOf(
-                    Address(postCode = 8123, city = "Mustertown", houseNumber = "93a")
-                )
-            )
-        )
-        val comparisonReponse = client.get("/users/verify"){
+        // Test whether the created customer corresponds with the provided one
+        val address = Json.encodeToString(Address(postCode = 1234, city = "Testing Town", houseNumber = "93a"))
+        val comparisonReponse = client.get("/users/verify/$id"){
             contentType(ContentType.Application.Json)
-            setBody(customer1)
+            setBody(address)
         }
 
         assertEquals(HttpStatusCode.OK, comparisonReponse.status)

@@ -16,7 +16,7 @@ fun Application.configureKoin() {
 }
 
 private val appKoinModule = module {
-    single { LoggerFactory.getLogger("") }
+    single{ LoggerFactory.getLogger("") }
     single<TicketDAO> { TicketDAOImpl() }
     single { KitchenService(logger = get(), ticketDAO = get()) }
 }

@@ -17,14 +17,7 @@ fun Application.configureKoin() {
 }
 
 private val appKoinModule = module {
-
-    single {
-        LoggerFactory.getLogger("")
-    }
-
-    single<MessageBroker> {
-        RabbitMQBroker
-    }
-
+    single { LoggerFactory.getLogger("") }
+    single<MessageBroker> { RabbitMQBroker }
 
 }

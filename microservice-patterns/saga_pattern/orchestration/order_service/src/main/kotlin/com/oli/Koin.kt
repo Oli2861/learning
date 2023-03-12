@@ -23,7 +23,7 @@ fun Application.configureKoin() {
 }
 
 private val appKoinModule = module {
-    single { LoggerFactory.getLogger("") }
+    single{ LoggerFactory.getLogger("") }
     single<MessageBroker> { RabbitMQBroker }
     single<OrderDAO> { OrderDAOImpl() }
     single<OrderSagaAssociationDAO> { OrderSagaAssociationDAOImpl() }
@@ -39,5 +39,5 @@ private val appKoinModule = module {
     }
     single<OrderRepository> { OrderRepositoryImpl(orderDAO = get(), orderSagaAssociationDAO = get()) }
     single<OrderService> { OrderService(orderRepository = get(), logger = get(), createOrderSagaManager = get()) }
-    single<OrderServiceProxy> { OrderService(orderRepository = get(), logger = get(), createOrderSagaManager = get()) }
+    single<OrderServiceProxy> { get<OrderService>() }
 }

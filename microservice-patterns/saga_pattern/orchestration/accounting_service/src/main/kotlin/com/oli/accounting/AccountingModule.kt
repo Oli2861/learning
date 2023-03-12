@@ -5,6 +5,7 @@ import com.oli.creditcardinfo.CreditCardInfoDAOImpl
 import io.ktor.server.application.*
 import org.koin.dsl.module
 import org.koin.ktor.plugin.koin
+import org.slf4j.LoggerFactory
 
 fun Application.accountingModule(){
     koin{

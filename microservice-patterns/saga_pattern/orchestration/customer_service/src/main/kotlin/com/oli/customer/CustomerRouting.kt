@@ -1,5 +1,6 @@
 package com.oli.customer
 
+import com.oli.address.Address
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -32,9 +33,10 @@ fun Application.configureCustomerRouting() {
             }
         }
 
-        get("/users/verify"){
-            val customer = call.receive<Customer>()
-            val isOkay = service.verify(customer)
+        get("/users/verify/{id}"){
+            val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
+            val address = call.receive<Address>()
+            val isOkay = service.verify(id, address)
             if (isOkay != null) {
                 call.respond(HttpStatusCode.OK, isOkay)
             } else {

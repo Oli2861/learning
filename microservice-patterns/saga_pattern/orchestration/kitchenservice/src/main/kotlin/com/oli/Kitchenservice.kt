@@ -36,7 +36,7 @@ class KitchenService(
     }
 
     private suspend fun handleCreateTicketCommandEvent(correlationId: String, event: CreateTicketCommandEvent): ReplyEvent {
-        val ticket = Ticket(0, event.customerId, event.sagaId, EntityStates.PENDING, event.menuItems)
+        val ticket = Ticket(0, event.customerId, event.sagaId, EntityStates.PENDING, event.orderItems)
         val createdTicketId = ticketDAO.create(ticket)?.id
         val replyEvent = ReplyEvent(event.sagaId, createdTicketId != null)
         logger.debug("CorrelationId: $correlationId. Created ticket with id $createdTicketId")

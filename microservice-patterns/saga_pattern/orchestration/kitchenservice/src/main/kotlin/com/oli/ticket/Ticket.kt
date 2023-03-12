@@ -8,7 +8,7 @@ data class Ticket(
     val customerId: Int,
     val sagaId: Int,
     val state: Int,
-    val items: List<MenuItem>
+    val items: List<OrderItem>
 ) {
     fun equalsIgnoreTicketId(other: Any?): Boolean {
         if (other !is Ticket) return false
@@ -19,7 +19,7 @@ data class Ticket(
         return true
     }
 
-    private fun containsAllIgnoreId(list: List<MenuItem>, list1: List<MenuItem>): Boolean = list.map { otherItem ->
+    private fun containsAllIgnoreId(list: List<OrderItem>, list1: List<OrderItem>): Boolean = list.map { otherItem ->
         list1.any { it.equalIgnoreTicketId(otherItem) }
     }.all { true }
 

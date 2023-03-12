@@ -1,7 +1,7 @@
 package com.oli
 
 import com.oli.persistence.DatabaseFactory
-import com.oli.ticket.MenuItem
+import com.oli.ticket.OrderItem
 import com.oli.ticket.Ticket
 import com.oli.ticket.TicketDAO
 import com.oli.ticket.TicketDAOImpl
@@ -25,14 +25,14 @@ class TicketDAOTest {
 
     @Test
     fun createTest() = runBlocking {
-        val ticket = Ticket(0, 1, 2, 1, listOf(MenuItem(0, 10, 2), MenuItem(0, 20, 3)))
+        val ticket = Ticket(0, 1, 2, 1, listOf(OrderItem(0, 10, 2), OrderItem(0, 20, 3)))
         val created = ticketDAO.create(ticket)
         assertTrue(ticket.equalsIgnoreTicketId(created))
     }
 
     @Test
     fun readTest() = runBlocking{
-        val ticket = Ticket(0, 1, 2, 1, listOf(MenuItem(0, 10, 2), MenuItem(0, 20, 3)))
+        val ticket = Ticket(0, 1, 2, 1, listOf(OrderItem(0, 10, 2), OrderItem(0, 20, 3)))
         val created = ticketDAO.create(ticket)
         val read = ticketDAO.read(created!!.id)
 
@@ -41,10 +41,10 @@ class TicketDAOTest {
 
     @Test
     fun updateStateTest() = runBlocking{
-        val ticket = Ticket(0, 1, 2, 1, listOf(MenuItem(0, 10, 2), MenuItem(0, 20, 3)))
+        val ticket = Ticket(0, 1, 2, 1, listOf(OrderItem(0, 10, 2), OrderItem(0, 20, 3)))
         val created = ticketDAO.create(ticket)
-        val updated = ticketDAO.updateState(created!!.id, 0)
-        val read = ticketDAO.read(created.id)
+        val updated = ticketDAO.updateState(ticket.sagaId, 0)
+        val read = ticketDAO.read(created!!.id)
 
         assertEquals(1, updated)
         assertEquals(0, read!!.state)
