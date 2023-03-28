@@ -21,8 +21,9 @@ services:
       - ./volumes/postgres/data/order_service:/var/lib/postgresql/data:rw
       - ./volumes/postgres/logs/order_service:/var/log/postgresql:rw
   order_service:
-    build:
-      context: ./order_service
+    build: 
+      context: order_service
+      dockerfile: Dockerfile
     image: order_service
     container_name: order_service
     ports: 
@@ -43,8 +44,9 @@ services:
       - rabbitmq
       - postgres
   customer_service:
-    build:
-      context: ./customer_service
+    build: 
+      context: customer_service
+      dockerfile: Dockerfile
     image: customer_service
     container_name: customer_service
     ports:
@@ -63,8 +65,9 @@ services:
       - rabbitmq
       - postgres
   kitchenservice_service:
-    build:
-      context: ./kitchenservice
+    build: 
+      context: kitchenservice
+      dockerfile: Dockerfile
     image: kitchen_service
     container_name: kitchenservice_service
     ports:
@@ -83,8 +86,9 @@ services:
       - rabbitmq
       - postgres
   accounting_service:
-    build:
-      context: ./accounting_service
+    build: 
+      context: accounting_service
+      dockerfile: Dockerfile
     image: accounting_service
     container_name: accounting_service
     ports:
