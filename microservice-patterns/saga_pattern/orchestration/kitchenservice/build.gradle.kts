@@ -24,6 +24,12 @@ application {
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }
 
+ktor {
+    fatJar {
+        archiveFileName.set("kitchen_service_fat.jar")
+    }
+}
+
 repositories {
     mavenCentral()
 }

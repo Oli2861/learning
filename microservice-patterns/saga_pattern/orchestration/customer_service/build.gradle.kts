@@ -29,6 +29,12 @@ tasks.withType<Jar> {
     }
 }
 
+ktor {
+    fatJar {
+        archiveFileName.set("customer_service_fat.jar")
+    }
+}
+
 repositories {
     mavenCentral()
 }
