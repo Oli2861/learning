@@ -4,13 +4,13 @@ interface Datasource {
     fun retrieveData(): String
 }
 
-class Datasource1 : Datasource {
+class TwitterAPI : Datasource {
     override fun retrieveData(): String {
         return "Data from datasource1"
     }
 }
 
-class Datasource2 : Datasource {
+class BeautifulSoupWebScraper : Datasource {
     override fun retrieveData(): String {
         return "Data from datasource2"
     }

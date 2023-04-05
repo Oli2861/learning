@@ -11,11 +11,11 @@ abstract class AbstractFactory {
 class Factory1 : AbstractFactory() {
 
     override fun createStorageSolution(): StorageSolution {
-        return Storage1()
+        return MySqlDatabase()
     }
 
     override fun createDatasource(): Datasource {
-        return Datasource2()
+        return BeautifulSoupWebScraper()
     }
 
 }
@@ -23,11 +23,11 @@ class Factory1 : AbstractFactory() {
 class Factory2 : AbstractFactory() {
 
     override fun createStorageSolution(): StorageSolution {
-        return Storage2()
+        return MongoDB()
     }
 
     override fun createDatasource(): Datasource {
-        return Datasource1()
+        return TwitterAPI()
     }
 
 }

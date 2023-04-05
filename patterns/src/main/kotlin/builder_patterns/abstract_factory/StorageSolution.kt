@@ -4,13 +4,13 @@ interface StorageSolution {
     fun saveData(data: String)
 }
 
-class Storage1 : StorageSolution {
+class MySqlDatabase : StorageSolution {
     override fun saveData(data: String) {
         println(data)
     }
 }
 
-class Storage2 : StorageSolution {
+class MongoDB : StorageSolution {
     override fun saveData(data: String) {
         println(data)
     }
