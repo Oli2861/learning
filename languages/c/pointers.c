@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 void changer(int *ptr) {
     // Dereferencing: Accessing the value stored at the memory address held by
@@ -29,5 +30,11 @@ int main(int argc, char *argv[]) {
     printf("%d\n", *p);
     printf("%d\n", *(p+2));
     printf("%d\n", *(p+4));
+
+    int n = 5;
+    int *pointer;
+    pointer = &n;
+    *pointer = 20;
+    printf("20 == %d\n", *pointer);
     return 0;
 }
