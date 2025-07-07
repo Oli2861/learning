@@ -1,0 +1,7 @@
+### Search
+POST http://localhost:8000/search
+Content-Type: application/json
+
+{
+  "query": "example search term"
+}
