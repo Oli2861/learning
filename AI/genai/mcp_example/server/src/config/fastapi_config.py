@@ -5,7 +5,8 @@ from fastapi import FastAPI, HTTPException
 from starlette.responses import JSONResponse
 from starlette.routing import BaseRoute
 
-from search_router import search_router
+from adapters.search_router import search_router
+
 
 app = FastAPI()
 

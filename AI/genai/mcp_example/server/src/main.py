@@ -1,9 +1,9 @@
 import uvicorn
 
-from fastapi_config import configure_fastapi
-from mcp_config import configure_mcp
-from mcp_resources import list_resources, read_file
-from mcp_tools import search
+from config.fastapi_config import configure_fastapi
+from config.mcp_config import configure_mcp
+from adapters.mcp_resources import list_resources, read_file
+from adapters.search_router import search
 
 if __name__ == "__main__":
     mcp_routes = configure_mcp(

@@ -5,7 +5,7 @@ from typing import List
 from mcp.types import Resource
 from pydantic import AnyUrl
 
-from mcp_config import mcp
+from config.mcp_config import mcp
 
 
 @mcp._mcp_server.list_resources()
