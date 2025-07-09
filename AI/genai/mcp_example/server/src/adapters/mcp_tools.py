@@ -5,9 +5,9 @@ from mcp.server.auth.middleware.auth_context import get_access_token
 from mcp.server.auth.provider import AccessToken
 from mcp.types import CallToolResult, TextContent
 
-from mcp_config import mcp
+from config.mcp_config import mcp
 from models.document import Document
-from search import search_documents
+from search.search import search_documents
 
 
 @mcp.tool(
